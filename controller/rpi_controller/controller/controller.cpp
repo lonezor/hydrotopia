@@ -170,6 +170,7 @@ void controller::socket_user_interface_thread_main(controller *_this)
 void controller::serial_console_thread_main(controller *_this)
 {
 #ifdef HC_SERIAL_CONSOLE_ENABLED
+
     auto ctx = _this->ctx_;
 
     SerialPort serialPort("/dev/ttyACM0", BaudRate::B_9600, NumDataBits::EIGHT,
@@ -193,10 +194,11 @@ void controller::serial_console_thread_main(controller *_this)
 
             // Ignore initial incomplete entry
             if (entry.size() > 80) {
+                
                 // Get stored state (and update below when possible)
-                chassi_measurements status;
+                common::chassi_measurements status;
                 {
-                    const std::lock_guard<std::mutex> lock(*ctx_->mutex);
+                    const std::lock_guard<std::mutex> lock(*ctx->mutex);
                     status = ctx->chassi_status;
                 }
 
@@ -274,7 +276,7 @@ void controller::serial_console_thread_main(controller *_this)
 
                 // Update shared structure
                 {
-                    const std::lock_guard<std::mutex> lock(*ctx_->mutex);
+                    const std::lock_guard<std::mutex> lock(*ctx->mutex);
                     ctx->chassi_status = status;
                 }
             }
