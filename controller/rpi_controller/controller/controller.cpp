@@ -127,6 +127,23 @@ void controller::system_clock_tick_cb(common::task_context task_ctx,
         // Update graphical user interface
         auto time = clock->time();
     }
+
+    // Update system wide alarm status
+    auto ctx = _this->ctx_;
+    if (ctx->chassi_status.door_alarm) {
+        ctx->system_wide_alarm_ = true;
+    } else {
+        // over time more alarms are seen as critical
+        // When using several inputs, this line cannot
+        // clear the overall status
+        ctx->system_wide_alarm_ = false;
+    }
+
+    if (ctx->system_wide_alarm_) {
+        channel_collection->rotary_alarm_light->activate();
+    } else {
+        channel_collection->rotary_alarm_light->deactivate();
+    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -226,6 +243,23 @@ void controller::serial_console_thread_main(controller *_this)
                 } else if (chassi_temp_alarm == 1) {
                     ctx->chassi_status.chassi_temp_alarm = true;
                 } // -1 if unavailable
+
+                std::stringstream log_msg;
+                log_msg << "[controller::serial_console_thread_main] "
+                        << "ambient_temp " << ctx->chassi_status.ambient_temp
+                        << ", "
+                        << "ambient_humidity "
+                        << ctx->chassi_status.ambient_humidity << ", "
+                        << "chassi_temp " << ctx->chassi_status.chassi_temp
+                        << ", "
+                        << "chassi_humidity "
+                        << ctx->chassi_status.chassi_humidity << ", "
+                        << "door_alarm " << ctx->chassi_status.door_alarm << " "
+                        << "chassi_temp_warning "
+                        << ctx->chassi_status.chassi_temp_warning << ", "
+                        << "chassi_temp_alarm "
+                        << ctx->chassi_status.chassi_temp_alarm << std::endl;
+                common::log(common::log_level::log_level_debug, log_msg.str());
             }
 
             auto remaining = status.str().substr(pos, status.str().size() - 1);
@@ -236,7 +270,7 @@ void controller::serial_console_thread_main(controller *_this)
     serialPort.Close();
 #else  // HC_SERIAL_CONSOLE_ENABLED
     common::log(common::log_level::log_level_notice,
-                "[water_pump_channel::serial_console_thread_main] stubbed\n");
+                "[controller::serial_console_thread_main] stubbed\n");
 #endif // HC_SERIAL_CONSOLE_ENABLED
 }
 

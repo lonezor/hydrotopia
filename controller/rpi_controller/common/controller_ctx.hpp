@@ -50,6 +50,7 @@ struct controller_ctx
     std::shared_ptr<common::system_clock> clock{nullptr};
     std::shared_ptr<common::relay_module> relay_module{nullptr};
     chassi_measurements chassi_status;
+    bool system_wide_alarm_{false};
 };
 
 //---------------------------------------------------------------------------------------------------------------------
