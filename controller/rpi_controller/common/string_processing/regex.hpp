@@ -16,41 +16,23 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>
  */
 
-#pragma once
-
-#include <memory>
-
-#include <common/configuration.hpp>
-#include <common/relay_module/relay_module.hpp>
-#include <common/system_clock.hpp>
-#include <common/task_scheduler/task_scheduler_interface.hpp>
+#include <string>
 
 namespace hydroctrl {
 namespace common {
 
 //---------------------------------------------------------------------------------------------------------------------
 
-struct chassi_measurements
-{
-    double ambient_temp{0};
-    double ambient_humidity{0};
-    double chassi_temp{0};
-    double chassi_humidity{0};
-    bool door_alarm{false};
-    bool chassi_temp_warning{false};
-    bool chassi_temp_alarm{false};
-};
+int extract_integer(const std::string &str, const std::string &expression);
 
-//---------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------
 
-struct controller_ctx
-{
-    std::shared_ptr<common::configuration> config{nullptr};
-    std::shared_ptr<common::task_scheduler_interface> task_scheduler{nullptr};
-    std::shared_ptr<common::system_clock> clock{nullptr};
-    std::shared_ptr<common::relay_module> relay_module{nullptr};
-    chassi_measurements chassi_status;
-};
+double extract_double(const std::string &str, const std::string &expression);
+
+//-------------------------------------------------------------------------------------------------------------------
+
+std::string extract_string(const std::string &str,
+                           const std::string &expression);
 
 //---------------------------------------------------------------------------------------------------------------------
 

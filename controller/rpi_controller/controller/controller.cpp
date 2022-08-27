@@ -18,6 +18,11 @@
 
 #include <thread>
 
+#include <CppLinuxSerial/SerialPort.hpp>
+
+using namespace mn::CppLinuxSerial;
+
+#include <common/string_processing/regex.hpp>
 #include <controller/controller.hpp>
 #include <user_interface/socket_user_interface/request_handler.hpp>
 
@@ -142,6 +147,101 @@ void controller::socket_user_interface_thread_main(controller *_this)
 
 //---------------------------------------------------------------------------------------------------------------------
 
+void controller::serial_console_thread_main(controller *_this)
+{
+#ifdef HC_SERIAL_CONSOLE_ENABLED
+    auto ctx = _this->ctx_;
+
+    SerialPort serialPort("/dev/ttyACM0", BaudRate::B_9600, NumDataBits::EIGHT,
+                          Parity::NONE, NumStopBits::ONE);
+
+    // Blocking read
+    serialPort.SetTimeout(-1);
+
+    serialPort.Open();
+
+    std::stringstream status;
+
+    while (true) {
+        std::string rx;
+        serialPort.Read(rx);
+        status << rx;
+
+        auto pos = status.str().find("\n");
+        if (pos != std::string::npos) {
+            auto entry = status.str().substr(0, pos);
+
+            // Ignore initial incomplete entry
+            if (entry.size() > 80) {
+
+                // Ambient temperature
+                auto temp = common::extract_double(entry, ".*temp=(.*?),");
+                if (temp > 0 && temp < 100) {
+                    ctx->chassi_status.ambient_temp = temp;
+                }
+
+                // Ambient humidity
+                auto humidity =
+                    common::extract_double(entry, ".*humidity=(.*?),");
+                if (humidity > 0 && humidity < 100) {
+                    ctx->chassi_status.ambient_humidity = humidity;
+                }
+
+                // Chassi temperature
+                auto temp2 = common::extract_double(entry, ".*temp2=(.*?),");
+                if (temp2 > 0 && temp2 < 100) {
+                    ctx->chassi_status.chassi_temp = temp2;
+                }
+
+                // Chassi humidity
+                auto humidity2 =
+                    common::extract_double(entry, ".*humidity2=(.*?),");
+                if (humidity2 > 0 && humidity2 < 100) {
+                    ctx->chassi_status.chassi_humidity = humidity2;
+                }
+
+                // Door alarm
+                auto door_alarm =
+                    common::extract_integer(entry, ".*door_alarm=(\\d),");
+                if (door_alarm == 0) {
+                    ctx->chassi_status.door_alarm = false;
+                } else if (door_alarm == 1) {
+                    ctx->chassi_status.door_alarm = true;
+                } // -1 if unavailable
+
+                // Chassi temperature warning
+                auto chassi_temp_warning = common::extract_integer(
+                    entry, ".*chassi_temp_warning=(\\d),");
+                if (chassi_temp_warning == 0) {
+                    ctx->chassi_status.chassi_temp_warning = false;
+                } else if (chassi_temp_warning == 1) {
+                    ctx->chassi_status.chassi_temp_warning = true;
+                } // -1 if unavailable
+
+                // Chassi temperature alarm
+                auto chassi_temp_alarm = common::extract_integer(
+                    entry, ".*chassi_temp_alarm=(\\d);");
+                if (chassi_temp_alarm == 0) {
+                    ctx->chassi_status.chassi_temp_alarm = false;
+                } else if (chassi_temp_alarm == 1) {
+                    ctx->chassi_status.chassi_temp_alarm = true;
+                } // -1 if unavailable
+            }
+
+            auto remaining = status.str().substr(pos, status.str().size() - 1);
+            status = std::stringstream(remaining);
+        }
+    }
+
+    serialPort.Close();
+#else  // HC_SERIAL_CONSOLE_ENABLED
+    common::log(common::log_level::log_level_notice,
+                "[water_pump_channel::serial_console_thread_main] stubbed\n");
+#endif // HC_SERIAL_CONSOLE_ENABLED
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
 void controller::run()
 {
     // Setup system clock timer
@@ -153,10 +253,12 @@ void controller::run()
     auto task_scheduler_thread = std::thread(task_scheduler_thread_main, this);
     auto socket_user_interface_thread =
         std::thread(socket_user_interface_thread_main, this);
+    auto serial_console_thread = std::thread(serial_console_thread_main, this);
 
     // Wait for threads exit
     task_scheduler_thread.join();
     socket_user_interface_thread.join();
+    serial_console_thread.join();
 }
 
 //---------------------------------------------------------------------------------------------------------------------

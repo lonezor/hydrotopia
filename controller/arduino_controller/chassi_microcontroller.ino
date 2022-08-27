@@ -228,9 +228,8 @@ void loop() {
         digitalWrite(PIN_LED_ITERATION_IND, LOW);   
       }
 
-
     char status[1024];
-    snprintf(status, sizeof(status), "temp=%d.%d, temp2=%d.%d, humidity=%d.%d, humidity2=%d.%d, door_alarm=%d, chassi_temp_warning=%d, chassi_temp_warning=%d",
+    snprintf(status, sizeof(status), "temp=%d.%d, temp2=%d.%d, humidity=%d.%d, humidity2=%d.%d, door_alarm=%d, chassi_temp_warning=%d, chassi_temp_alarm=%d;",
       dht_01_temperature / 100, dht_01_temperature % 100,
       dht_02_temperature / 100, dht_02_temperature % 100,
       dht_01_humidity / 100, dht_01_humidity % 100,

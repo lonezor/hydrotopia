@@ -111,7 +111,7 @@ void relay_module::activate(int index)
     rc_relay_channel_t ch = relay_module::index_to_channel_type(index);
     rc_relay_channel_set(rc_relay_port_a, ch, true);
 #else  // HC_RELAY_MODULE_ENABLED
-    common::log(common::log_level::log_level_debug,
+    common::log(common::log_level::log_level_notice,
                 "[relay_module::activate] stubbed");
 #endif // HC_RELAY_MODULE_ENABLED
 }
@@ -126,7 +126,7 @@ void relay_module::deactivate(int index)
     rc_relay_channel_t ch = relay_module::index_to_channel_type(index);
     rc_relay_channel_set(rc_relay_port_a, ch, false);
 #else  // HC_RELAY_MODULE_ENABLED
-    common::log(common::log_level::log_level_debug,
+    common::log(common::log_level::log_level_notice,
                 "[relay_module::deactivate] stubbed");
 #endif // HC_RELAY_MODULE_ENABLED
 }
@@ -135,6 +135,7 @@ void relay_module::deactivate(int index)
 
 void relay_module::clear()
 {
+#ifdef HC_RELAY_MODULE_ENABLED
     common::log(common::log_level::log_level_debug, "[relay_module::clear]");
 
     rc_relay_channel_set(rc_relay_port_a, rc_relay_channel_01, false);
@@ -170,6 +171,10 @@ void relay_module::clear()
     rc_relay_channel_set(rc_relay_port_b, rc_relay_channel_14, false);
     rc_relay_channel_set(rc_relay_port_b, rc_relay_channel_15, false);
     rc_relay_channel_set(rc_relay_port_b, rc_relay_channel_16, false);
+#else  // HC_RELAY_MODULE_ENABLED
+    common::log(common::log_level::log_level_notice,
+                "[relay_module::clear] stubbed");
+#endif // HC_RELAY_MODULE_ENABLED
 }
 
 //---------------------------------------------------------------------------------------------------------------------

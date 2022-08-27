@@ -37,11 +37,11 @@
  * This implementation is based on the relay modules made by
  * National Control Devices. They provide an I2C interface that
  * connects to the MCP23017 module from Microchip Technology.
- * 
+ *
  * The relay channels are controlled by configuring the I/O
  * direction register to output mode and setting the associated
  * GPIO pins.
- * 
+ *
  * For 32 port relay modules, two I2C addresses are used. The
  * implementation also supports a 16 port relay module using
  * only one address.

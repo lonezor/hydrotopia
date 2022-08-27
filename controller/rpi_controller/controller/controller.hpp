@@ -45,6 +45,8 @@ class controller
 
     static void socket_user_interface_thread_main(controller *_this);
 
+    static void serial_console_thread_main(controller *_this);
+
     std::shared_ptr<common::controller_ctx> ctx_{nullptr};
 
     std::shared_ptr<common::channel_collection> channel_collection_{nullptr};
