@@ -37,8 +37,9 @@ namespace user_interface {
 
 request_handler::request_handler(
     std::shared_ptr<common::configuration> config,
-    std::shared_ptr<common::channel_collection> channel_collection)
-    : config_(config), channel_collection_(channel_collection)
+    std::shared_ptr<common::channel_collection> channel_collection,
+    std::shared_ptr<common::controller_ctx> ctx)
+    : config_(config), channel_collection_(channel_collection), ctx_(ctx)
 {
     io_monitor_ = std::make_shared<common::io_monitor>(common::io_monitor());
 
@@ -124,6 +125,8 @@ void request_handler::run()
         // The server must be able to handle bad client input
         try {
             for (auto &&event : events) {
+                const std::lock_guard<std::mutex> lock(*ctx_->mutex);
+
                 common::event_type event_type = event->get_type();
 
                 // Socket event

@@ -34,10 +34,13 @@ namespace controller {
 controller::controller(std::shared_ptr<common::configuration> cfg)
 {
     ctx_ = std::make_shared<common::controller_ctx>();
+    ctx_->mutex = std::make_shared<std::mutex>();
     ctx_->config = cfg;
-    ctx_->task_scheduler = common::create_task_scheduler();
     ctx_->clock = std::make_shared<common::system_clock>();
     ctx_->relay_module = std::make_shared<common::relay_module>();
+
+    ctx_->task_scheduler = common::create_task_scheduler();
+    ctx_->task_scheduler->set_mutex(ctx_->mutex);
 
     channel_collection_ = std::make_shared<common::channel_collection>();
 
@@ -102,7 +105,7 @@ controller::controller(std::shared_ptr<common::configuration> cfg)
     channel_collection_->all_channels.emplace_back(e9);
 
     request_handler_ = std::make_shared<user_interface::request_handler>(
-        cfg, channel_collection_);
+        cfg, channel_collection_, ctx_);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -190,76 +193,90 @@ void controller::serial_console_thread_main(controller *_this)
 
             // Ignore initial incomplete entry
             if (entry.size() > 80) {
+                // Get stored state (and update below when possible)
+                chassi_measurements status;
+                {
+                    const std::lock_guard<std::mutex> lock(*ctx_->mutex);
+                    status = ctx->chassi_status;
+                }
 
                 // Ambient temperature
                 auto temp = common::extract_double(entry, ".*temp=(.*?),");
                 if (temp > 0 && temp < 100) {
-                    ctx->chassi_status.ambient_temp = temp;
+                    status.ambient_temp = temp;
                 }
 
                 // Ambient humidity
                 auto humidity =
                     common::extract_double(entry, ".*humidity=(.*?),");
                 if (humidity > 0 && humidity < 100) {
-                    ctx->chassi_status.ambient_humidity = humidity;
+                    status.ambient_humidity = humidity;
                 }
 
                 // Chassi temperature
                 auto temp2 = common::extract_double(entry, ".*temp2=(.*?),");
                 if (temp2 > 0 && temp2 < 100) {
-                    ctx->chassi_status.chassi_temp = temp2;
+                    status.chassi_temp = temp2;
                 }
 
                 // Chassi humidity
                 auto humidity2 =
                     common::extract_double(entry, ".*humidity2=(.*?),");
                 if (humidity2 > 0 && humidity2 < 100) {
-                    ctx->chassi_status.chassi_humidity = humidity2;
+                    status.chassi_humidity = humidity2;
                 }
 
                 // Door alarm
                 auto door_alarm =
                     common::extract_integer(entry, ".*door_alarm=(\\d),");
                 if (door_alarm == 0) {
-                    ctx->chassi_status.door_alarm = false;
+                    status.door_alarm = false;
                 } else if (door_alarm == 1) {
-                    ctx->chassi_status.door_alarm = true;
+                    status.door_alarm = true;
                 } // -1 if unavailable
 
                 // Chassi temperature warning
                 auto chassi_temp_warning = common::extract_integer(
                     entry, ".*chassi_temp_warning=(\\d),");
                 if (chassi_temp_warning == 0) {
-                    ctx->chassi_status.chassi_temp_warning = false;
+                    status.chassi_temp_warning = false;
                 } else if (chassi_temp_warning == 1) {
-                    ctx->chassi_status.chassi_temp_warning = true;
+                    status.chassi_temp_warning = true;
                 } // -1 if unavailable
 
                 // Chassi temperature alarm
                 auto chassi_temp_alarm = common::extract_integer(
                     entry, ".*chassi_temp_alarm=(\\d);");
                 if (chassi_temp_alarm == 0) {
-                    ctx->chassi_status.chassi_temp_alarm = false;
+                    status.chassi_temp_alarm = false;
                 } else if (chassi_temp_alarm == 1) {
-                    ctx->chassi_status.chassi_temp_alarm = true;
+                    status.chassi_temp_alarm = true;
                 } // -1 if unavailable
 
                 std::stringstream log_msg;
                 log_msg << "[controller::serial_console_thread_main] "
-                        << "ambient_temp " << ctx->chassi_status.ambient_temp
-                        << ", "
-                        << "ambient_humidity "
-                        << ctx->chassi_status.ambient_humidity << ", "
-                        << "chassi_temp " << ctx->chassi_status.chassi_temp
-                        << ", "
-                        << "chassi_humidity "
-                        << ctx->chassi_status.chassi_humidity << ", "
-                        << "door_alarm " << ctx->chassi_status.door_alarm << " "
-                        << "chassi_temp_warning "
-                        << ctx->chassi_status.chassi_temp_warning << ", "
-                        << "chassi_temp_alarm "
-                        << ctx->chassi_status.chassi_temp_alarm << std::endl;
+                        << "entry '" << entry << "'";
                 common::log(common::log_level::log_level_debug, log_msg.str());
+
+                log_msg = std::stringstream("");
+                log_msg << "[controller::serial_console_thread_main] "
+                        << "ambient_temp " << status.ambient_temp << ", "
+                        << "ambient_humidity " << status.ambient_humidity
+                        << ", "
+                        << "chassi_temp " << status.chassi_temp << ", "
+                        << "chassi_humidity " << status.chassi_humidity << ", "
+                        << "door_alarm " << status.door_alarm << " "
+                        << "chassi_temp_warning " << status.chassi_temp_warning
+                        << ", "
+                        << "chassi_temp_alarm " << status.chassi_temp_alarm
+                        << std::endl;
+                common::log(common::log_level::log_level_info, log_msg.str());
+
+                // Update shared structure
+                {
+                    const std::lock_guard<std::mutex> lock(*ctx_->mutex);
+                    ctx->chassi_status = status;
+                }
             }
 
             auto remaining = status.str().substr(pos, status.str().size() - 1);

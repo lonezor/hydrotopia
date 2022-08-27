@@ -22,6 +22,7 @@
 
 #include <common/channel_collection.hpp>
 #include <common/configuration.hpp>
+#include <common/controller_ctx.hpp>
 #include <common/event.hpp>
 #include <common/io_monitor.hpp>
 #include <common/network/socket.hpp>
@@ -34,6 +35,7 @@ namespace user_interface {
 /** Message state */
 struct msg_state
 {
+    /** Placeholder */
     int abc;
 };
 
@@ -61,7 +63,8 @@ class request_handler
      */
     request_handler(
         std::shared_ptr<common::configuration> config,
-        std::shared_ptr<common::channel_collection> channel_collection);
+        std::shared_ptr<common::channel_collection> channel_collection,
+        std::shared_ptr<common::controller_ctx> ctx);
 
     /** @brief Request handler execution loop
      */
@@ -125,6 +128,9 @@ class request_handler
 
     /** Channel collection */
     std::shared_ptr<common::channel_collection> channel_collection_;
+
+    /** Controller context */
+    std::shared_ptr<common::controller_ctx> ctx_;
 
     /** Target map (key: socket descriptor) */
     std::unordered_map<int, msg_state> target_map_;

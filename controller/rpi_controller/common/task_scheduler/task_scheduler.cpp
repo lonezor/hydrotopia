@@ -125,6 +125,13 @@ void task_scheduler::cancel_task(task_id tid, cancel_info cancel_behaviour)
 
 //-------------------------------------------------------------------------------------------------------------------
 
+void task_scheduler::set_mutex(std::shared_ptr<std::mutex> mutex)
+{
+    mutex_ = mutex;
+}
+
+//-------------------------------------------------------------------------------------------------------------------
+
 void task_scheduler::run(task_scheduler_mode mode)
 {
     switch (mode) {
@@ -164,6 +171,13 @@ void task_scheduler::invoke_callback(std::shared_ptr<task> tsk)
 
     // Invoke std::bind() object while providing
     // std::placeholders::_1 with task context
+
+    if (mutex_ != nullptr) {
+        const std::lock_guard<std::mutex> lock(*mutex_);
+        (*tsk->cb)(tsk->ctx);
+        return;
+    }
+
     (*tsk->cb)(tsk->ctx);
 }
 

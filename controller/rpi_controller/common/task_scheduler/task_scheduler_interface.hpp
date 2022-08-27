@@ -146,6 +146,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <unordered_map>
 
 #include <common/task_scheduler/data_types.hpp>
@@ -211,7 +212,7 @@ class task_scheduler_interface
                            size_t nr_iterations,
                            std::function<void(task_context)> cb) = 0;
 
-    /** @brief  Cancel ongoing task
+    /** @brief Cancel ongoing task
      *
      * If the given tid is currently scheduled it is cancelled. Invalid
      * identifiers are ignored.
@@ -220,6 +221,18 @@ class task_scheduler_interface
      * @param cancel_behaviour   Cancel behaviour
      */
     virtual void cancel_task(task_id tid, cancel_info cancel_behaviour) = 0;
+
+    /** @brief Set mutex
+     *
+     * This invokes the mutex just before invoking registered callback
+     * in order to protect resources shared between threads.
+     *
+     * This is much safer than adding mutex code in numerous callback
+     * functions. Simple and effective
+     *
+     * @param mutex  User specified mutex
+     */
+    virtual void set_mutex(std::shared_ptr<std::mutex> mutex) = 0;
 
     /** @brief Run scheduler
      *

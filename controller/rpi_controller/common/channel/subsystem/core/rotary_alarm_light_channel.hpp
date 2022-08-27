@@ -40,6 +40,9 @@ class rotary_alarm_light_channel : public channel
      * Immediate channel deactivation
      */
     void deactivate() final;
+
+  private:
+    bool activated_{false};
 };
 
 //---------------------------------------------------------------------------------------------------------------------

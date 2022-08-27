@@ -37,6 +37,10 @@ rotary_alarm_light_channel::rotary_alarm_light_channel(
 
 void rotary_alarm_light_channel::activate()
 {
+    if (activated_) {
+        return;
+    }
+
     // activate relay
     auto indexes = relay_indexes();
     if (indexes.size() == 1) {
@@ -45,12 +49,18 @@ void rotary_alarm_light_channel::activate()
         throw std::runtime_error(
             "[rotary_alarm_light_channel::activate] critical error");
     }
+
+    activated_ = true;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 
 void rotary_alarm_light_channel::deactivate()
 {
+    if (!activated_) {
+        return;
+    }
+
     // deactivate relay
     auto indexes = relay_indexes();
     if (indexes.size() == 1) {
@@ -59,6 +69,8 @@ void rotary_alarm_light_channel::deactivate()
         throw std::runtime_error(
             "[rotary_alarm_light_channel::deactivate] critical error");
     }
+
+    activated_ = false;
 }
 
 //---------------------------------------------------------------------------------------------------------------------

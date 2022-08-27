@@ -19,6 +19,7 @@
 #pragma once
 
 #include <memory>
+#include <mutex>
 
 #include <common/configuration.hpp>
 #include <common/relay_module/relay_module.hpp>
@@ -30,6 +31,7 @@ namespace common {
 
 //---------------------------------------------------------------------------------------------------------------------
 
+/** Chassi measurements */
 struct chassi_measurements
 {
     double ambient_temp{0};
@@ -43,8 +45,10 @@ struct chassi_measurements
 
 //---------------------------------------------------------------------------------------------------------------------
 
+/** Controller context */
 struct controller_ctx
 {
+    std::shared_ptr<std::mutex> mutex{nullptr};
     std::shared_ptr<common::configuration> config{nullptr};
     std::shared_ptr<common::task_scheduler_interface> task_scheduler{nullptr};
     std::shared_ptr<common::system_clock> clock{nullptr};

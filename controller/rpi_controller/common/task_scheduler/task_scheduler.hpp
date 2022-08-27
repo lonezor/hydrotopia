@@ -92,6 +92,18 @@ class task_scheduler : public task_scheduler_interface
      */
     void cancel_task(task_id tid, cancel_info cancel_behaviour) final;
 
+    /** @brief Set mutex
+     *
+     * This invokes the mutex just before invoking registered callback
+     * in order to protect resources shared between threads.
+     *
+     * This is much safer than adding mutex code in numerous callback
+     * functions. Simple and effective
+     *
+     * @param mutex  User specified mutex
+     */
+    void set_mutex(std::shared_ptr<std::mutex> mutex) final;
+
     /** @brief Run scheduler
      *
      * See task_scheduler_interface::run() description for more information.
@@ -146,6 +158,8 @@ class task_scheduler : public task_scheduler_interface
     std::unordered_map<uint64_t, task_id> timer_map_;
 
     std::shared_ptr<common::io_monitor> io_monitor_;
+
+    std::shared_ptr<std::mutex> mutex_{nullptr};
 
     /** Exit flag */
     bool exit_{false};

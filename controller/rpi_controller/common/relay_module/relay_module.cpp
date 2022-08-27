@@ -31,7 +31,10 @@ namespace common {
 
 relay_module::relay_module()
 {
+#ifdef HC_RELAY_MODULE_ENABLED
     rc_relay_channel_init();
+#endif // HC_RELAY_MODULE_ENABLED
+
     clear();
 }
 
