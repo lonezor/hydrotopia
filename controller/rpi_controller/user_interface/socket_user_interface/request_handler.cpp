@@ -27,6 +27,7 @@
 #include <common/io_monitor.hpp>
 #include <common/log.hpp>
 #include <common/system/system.hpp>
+#include <common/system_clock.hpp>
 
 #include <user_interface/socket_user_interface/request_handler.hpp>
 
@@ -332,8 +333,15 @@ void request_handler::client_teardown(uint64_t timer_id)
 
 void request_handler::send_stats(const std::shared_ptr<common::socket> &sock)
 {
-    auto stats = ctx_->relay_module->stats();
-    gsl::span<const char> tx_span(stats.c_str(), strlen(stats.c_str()));
+    std::stringstream stats;
+
+    auto clock = common::system_clock();
+
+    stats << clock.date() << " " << clock.time_full() << std::endl << std::endl;
+    stats << ctx_->relay_module->stats();
+
+    gsl::span<const char> tx_span(stats.str().c_str(),
+                                  strlen(stats.str().c_str()));
     common::system::send(sock->get_fd(), tx_span, 0);
 }
 

@@ -105,7 +105,7 @@ int system_clock::second() { return second_; }
 std::string system_clock::date()
 {
     char buffer[128];
-    snprintf(buffer, sizeof(buffer), "%d:%02d:%02d", year_, month_, day_);
+    snprintf(buffer, sizeof(buffer), "%d-%02d-%02d", year_, month_, day_);
     return std::string(buffer);
 }
 
