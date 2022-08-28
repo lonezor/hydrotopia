@@ -335,9 +335,9 @@ void request_handler::send_stats(const std::shared_ptr<common::socket> &sock)
 {
     std::stringstream stats;
 
-    auto clock = common::system_clock();
+    auto clock = ctx_->clock;
 
-    stats << clock.date() << " " << clock.time_full() << std::endl << std::endl;
+    stats << clock->date() << " " << clock->time_full() << std::endl << std::endl;
     stats << ctx_->relay_module->stats();
 
     gsl::span<const char> tx_span(stats.str().c_str(),
