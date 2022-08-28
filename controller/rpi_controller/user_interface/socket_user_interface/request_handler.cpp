@@ -330,6 +330,15 @@ void request_handler::client_teardown(uint64_t timer_id)
 
 //-------------------------------------------------------------------------------------------------------------------
 
+void request_handler::send_stats(const std::shared_ptr<common::socket> &sock)
+{
+    auto stats = ctx_->relay_module->stats();
+    gsl::span<const char> tx_span(stats.c_str(), strlen(stats.c_str()));
+    common::system::send(sock->get_fd(), tx_span, 0);
+}
+
+//-------------------------------------------------------------------------------------------------------------------
+
 void request_handler::send_help_screen(
     const std::shared_ptr<common::socket> &sock)
 {
@@ -390,6 +399,7 @@ void request_handler::send_help_screen(
         << " - lower_water_pump_3_power_profile_hourly_30min" << std::endl
         << " - lower_water_pump_3_power_profile_hourly_60min" << std::endl
 
+        << " - stats" << std::endl
         << std::endl;
 
     gsl::span<const char> tx_span(help_screen.str().c_str(),
@@ -602,6 +612,8 @@ void request_handler::handle_client_msg(
                std::string::npos) {
         channel_collection_->lower_water_pump_3->set_power_consumption_profile(
             common::power_consumption_profile::high);
+    } else if (msg.find("stats") != std::string::npos) {
+        send_stats(sock);
     } else {
         send_help_screen(sock);
     }

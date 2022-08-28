@@ -18,7 +18,9 @@
 
 #pragma once
 
+#include <chrono>
 #include <cstddef>
+#include <vector>
 
 #include <rc/relay.h>
 
@@ -50,10 +52,33 @@ class relay_module
     /** Clear all channels */
     void clear();
 
+    /** Get stats: string representation */
+    std::string stats();
+
   private:
     rc_relay_channel_t index_to_channel_type(int index);
 
+    /**
+     *  @brief Relay activation state
+     *
+     * This guarantees that the relay module is only accessed
+     * in logically correct order. This avoids communicating
+     * over the serial bus.
+     */
+    std::vector<bool> activation_state_;
+
+    /** Relay module size */
     size_t size_{relay_module_size};
+
+    /** Activation histogram */
+    std::vector<uint64_t> activation_histogram_;
+
+    /** Activation timepoint references */
+    std::vector<std::chrono::steady_clock::time_point>
+        activation_timepoint_refs_;
+
+    /** Duration histogram */
+    std::vector<std::chrono::milliseconds> duration_histogram_;
 };
 
 //---------------------------------------------------------------------------------------------------------------------

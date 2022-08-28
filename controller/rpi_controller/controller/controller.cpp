@@ -194,7 +194,7 @@ void controller::serial_console_thread_main(controller *_this)
 
             // Ignore initial incomplete entry
             if (entry.size() > 80) {
-                
+
                 // Get stored state (and update below when possible)
                 common::chassi_measurements status;
                 {

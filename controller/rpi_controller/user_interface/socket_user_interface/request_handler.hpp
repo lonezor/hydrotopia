@@ -115,10 +115,15 @@ class request_handler
      */
     void client_teardown(uint64_t timer_id);
 
+    /** Handle client message */
     void handle_client_msg(const std::shared_ptr<common::socket> &sock,
                            const std::string &msg);
 
+    /** Send help screen */
     void send_help_screen(const std::shared_ptr<common::socket> &sock);
+
+    /** Send stats */
+    void send_stats(const std::shared_ptr<common::socket> &sock);
 
     /** I/O monitor for handling incoming client connections */
     std::shared_ptr<common::io_monitor> io_monitor_;
