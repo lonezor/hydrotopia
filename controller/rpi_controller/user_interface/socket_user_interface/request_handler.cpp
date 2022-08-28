@@ -340,8 +340,10 @@ void request_handler::send_stats(const std::shared_ptr<common::socket> &sock)
     stats << clock->date() << " " << clock->time_full() << std::endl << std::endl;
     stats << ctx_->relay_module->stats();
 
-    gsl::span<const char> tx_span(stats.str().c_str(),
-                                  strlen(stats.str().c_str()));
+    auto tx_buffer = stats.str();
+
+    gsl::span<const char> tx_span(tx_buffer.c_str(),
+                                  strlen(tx_buffer.c_str()));
     common::system::send(sock->get_fd(), tx_span, 0);
 }
 

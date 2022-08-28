@@ -70,8 +70,6 @@ void system_clock::update()
     // Second
     strftime(buffer, sizeof(buffer), "%S", &tstruct);
     second_ = std::atoi(buffer);
-
-    printf("update now %u %s %s\n", now, date().c_str(), time_full().c_str());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
