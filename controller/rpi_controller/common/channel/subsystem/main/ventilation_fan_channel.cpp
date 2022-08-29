@@ -111,6 +111,12 @@ bool ventilation_fan_channel::channel_update_needed()
 {
     auto cabinet_status = ctx()->cabinet_status;
 
+    // Manual mode
+    if (fan_mode_ == common::ventilation_fan_mode::low ||
+        fan_mode_ == common::ventilation_fan_mode::high) {
+        return true;
+    }
+
     // When not requesting 'off', fan RPM setting must be set
     if (fan_rpm_setting_ == common::ventilation_fan_mode::none) {
         return true;
