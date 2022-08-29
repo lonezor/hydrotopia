@@ -16,10 +16,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>
  */
 
-#include <Adafruit_Sensor.h>
 #include <DHT.h>
 #include <DHT_U.h>
-
 
 #define FALSE (0)
 #define TRUE (!FALSE)
