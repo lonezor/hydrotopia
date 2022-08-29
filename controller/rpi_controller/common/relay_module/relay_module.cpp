@@ -57,57 +57,89 @@ int relay_module::size() { return size_; }
 
 //---------------------------------------------------------------------------------------------------------------------
 
+rc_relay_port_t relay_module::index_to_relay_port(int index)
+{
+    if (index < 0 || index > 31) {
+        throw std::runtime_error("[relay_module::index_to_relay_port] failed "
+                                 "to map index to relay port");
+    }
+
+    if (index < 16) {
+        return rc_relay_port_a;
+    }
+
+    return rc_relay_port_b;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
 rc_relay_channel_t relay_module::index_to_channel_type(int index)
 {
     rc_relay_channel_t ch;
 
     switch (index) {
     case 0:
+    case 16:
         ch = rc_relay_channel_01;
         break;
     case 1:
+    case 17:
         ch = rc_relay_channel_02;
         break;
     case 2:
+    case 18:
         ch = rc_relay_channel_03;
         break;
     case 3:
+    case 19:
         ch = rc_relay_channel_04;
         break;
     case 4:
+    case 20:
         ch = rc_relay_channel_05;
         break;
     case 5:
+    case 21:
         ch = rc_relay_channel_06;
         break;
     case 6:
+    case 22:
         ch = rc_relay_channel_07;
         break;
     case 7:
+    case 23:
         ch = rc_relay_channel_08;
         break;
     case 8:
+    case 24:
         ch = rc_relay_channel_09;
         break;
     case 9:
+    case 25:
         ch = rc_relay_channel_10;
         break;
     case 10:
+    case 26:
         ch = rc_relay_channel_11;
         break;
     case 11:
+    case 27:
         ch = rc_relay_channel_12;
         break;
     case 12:
+    case 28:
         ch = rc_relay_channel_13;
         break;
     case 13:
+    case 29:
         ch = rc_relay_channel_14;
         break;
     case 14:
+    case 30:
         ch = rc_relay_channel_15;
         break;
     case 15:
+    case 31:
         ch = rc_relay_channel_16;
         break;
     default:
@@ -133,8 +165,9 @@ void relay_module::activate(int index)
 
 #ifdef HC_RELAY_MODULE_ENABLED
     common::log(common::log_level::log_level_debug, "[relay_module::activate]");
-    rc_relay_channel_t ch = relay_module::index_to_channel_type(index);
-    rc_relay_channel_set(rc_relay_port_a, ch, true);
+    auto port = index_to_relay_port(index);
+    auto ch = relay_module::index_to_channel_type(index);
+    rc_relay_channel_set(port, ch, true);
 #else  // HC_RELAY_MODULE_ENABLED
     common::log(common::log_level::log_level_notice,
                 "[relay_module::activate] stubbed");
@@ -161,8 +194,9 @@ void relay_module::deactivate(int index)
 #ifdef HC_RELAY_MODULE_ENABLED
     common::log(common::log_level::log_level_debug,
                 "[relay_module::deactivate]");
-    rc_relay_channel_t ch = relay_module::index_to_channel_type(index);
-    rc_relay_channel_set(rc_relay_port_a, ch, false);
+    auto port = index_to_relay_port(index);
+    auto ch = relay_module::index_to_channel_type(index);
+    rc_relay_channel_set(port, ch, false);
 #else  // HC_RELAY_MODULE_ENABLED
     common::log(common::log_level::log_level_notice,
                 "[relay_module::deactivate] stubbed");

@@ -56,6 +56,8 @@ class relay_module
     std::string stats();
 
   private:
+    rc_relay_port_t index_to_relay_port(int index);
+
     rc_relay_channel_t index_to_channel_type(int index);
 
     /**
