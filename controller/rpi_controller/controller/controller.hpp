@@ -57,6 +57,9 @@ class controller
         common::channel_type channel_type,
         common::power_consumption_profile power_profile, controller *_this);
 
+    static void user_request_development_cmd(std::string cmd,
+                                             controller *_this);
+
     std::shared_ptr<common::controller_ctx> ctx_{nullptr};
 
     std::shared_ptr<common::channel_collection> channel_collection_{nullptr};

@@ -34,18 +34,24 @@ class temperature
         celcius,
     };
 
+    /** Constructor */
+    temperature();
+
+    /** Constructor */
     temperature(temp_unit unit, double value);
 
+    /** Set temperature */
     void set(temp_unit unit, double value);
 
+    /** Get unit */
     temp_unit unit();
     double value();
 
-    /** Temperature unit */
-    temp_unit unit_;
+    /** Unit */
+    temp_unit unit_{temp_unit::unknown};
 
     /** Value, expressed in current temperature unit */
-    double value_;
+    double value_{0};
 };
 
 //---------------------------------------------------------------------------------------------------------------------

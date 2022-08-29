@@ -58,6 +58,11 @@ controller::controller(std::shared_ptr<common::configuration> cfg)
                            common::power_consumption_profile power_profile)>>(
         f2);
 
+    auto f3 =
+        std::bind(&user_request_development_cmd, std::placeholders::_1, this);
+    ctx_->user_request_development_cmd =
+        std::make_shared<std::function<void(std::string)>>(f3);
+
     request_handler_ =
         std::make_shared<user_interface::request_handler>(cfg, ctx_);
 
@@ -171,6 +176,26 @@ void controller::refresh_transformer_state(controller *_this)
         channel_collection->step_down_voltage_transformer->activate();
     } else {
         channel_collection->step_down_voltage_transformer->deactivate();
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
+void controller::user_request_development_cmd(std::string cmd,
+                                              controller *_this)
+{
+    auto ctx = _this->ctx_;
+
+    if (cmd.find("development_cmd_cabinet_temperature_low") !=
+        std::string::npos) {
+        ctx->cabinet_status.cabinet_temperature =
+            common::temperature(common::temperature::temp_unit::celcius, 20);
+    }
+
+    else if (cmd.find("development_cmd_cabinet_temperature_high") !=
+             std::string::npos) {
+        ctx->cabinet_status.cabinet_temperature =
+            common::temperature(common::temperature::temp_unit::celcius, 43);
     }
 }
 

@@ -28,7 +28,7 @@ namespace common {
 enum class ventilation_fan_mode
 {
     /** Initializer value */
-    unknown,
+    none,
 
     /** Low RPM */
     low,

@@ -28,6 +28,7 @@
 #include <common/relay_module/relay_module.hpp>
 #include <common/system_clock.hpp>
 #include <common/task_scheduler/task_scheduler_interface.hpp>
+#include <common/unit/temperature.hpp>
 #include <common/ventilation_fan.hpp>
 
 namespace hydroctrl {
@@ -38,13 +39,35 @@ namespace common {
 /** Chassi measurements */
 struct chassi_measurements
 {
+    /** Ambient temperature */
     double ambient_temp{0};
+
+    /** Ambient humidity */
     double ambient_humidity{0};
+
+    /** Chassi temperature */
     double chassi_temp{0};
+
+    /** Chassi humidity */
     double chassi_humidity{0};
+
+    /** Door alarm */
     bool door_alarm{false};
+
+    /** Chassi temperature warning */
     bool chassi_temp_warning{false};
+
+    /** Chassi temperature alarm */
     bool chassi_temp_alarm{false};
+};
+
+//---------------------------------------------------------------------------------------------------------------------
+
+/** Cabinet measurements */
+struct cabinet_measurements
+{
+    /** Cabinet temperature */
+    temperature cabinet_temperature;
 };
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -52,12 +75,28 @@ struct chassi_measurements
 /** Controller context */
 struct controller_ctx
 {
+    /** Mutex */
     std::shared_ptr<std::mutex> mutex{nullptr};
+
+    /** Configuration */
     std::shared_ptr<common::configuration> config{nullptr};
+
+    /** Task scheduler */
     std::shared_ptr<common::task_scheduler_interface> task_scheduler{nullptr};
+
+    /** Clock */
     std::shared_ptr<common::system_clock> clock{nullptr};
+
+    /** Relay module */
     std::shared_ptr<common::relay_module> relay_module{nullptr};
+
+    /** Chassi status */
     chassi_measurements chassi_status;
+
+    /** Cabinet status */
+    cabinet_measurements cabinet_status;
+
+    /** System wide alarm */
     bool system_wide_alarm_{false};
 
     /** @brief Callback function: user_request_set_ventilation_fan_mode()
@@ -75,6 +114,13 @@ struct controller_ctx
     std::shared_ptr<std::function<void(common::channel_type,
                                        common::power_consumption_profile)>>
         user_request_set_power_mode{nullptr};
+
+    /** @brief Callback function: user_request_development_cmd()
+     *
+     * @param cmd  Development command
+     */
+    std::shared_ptr<std::function<void(std::string)>>
+        user_request_development_cmd{nullptr};
 };
 
 //---------------------------------------------------------------------------------------------------------------------

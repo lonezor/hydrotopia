@@ -32,7 +32,7 @@ std::string ventilation_fan_mode_str(ventilation_fan_mode mode)
         return "High";
     case ventilation_fan_mode::automatic:
         return "Auto";
-    case ventilation_fan_mode::unknown:
+    case ventilation_fan_mode::none:
     default:
         return "";
     }

@@ -58,6 +58,9 @@ class ventilation_fan_channel : public channel
     void deactivate() final;
 
   private:
+    /** Channel update needed */
+    bool channel_update_needed();
+
     /** Channel activation timer callback */
     static void channel_activation_cb(common::task_context task_ctx,
                                       ventilation_fan_channel *_this);
@@ -72,6 +75,10 @@ class ventilation_fan_channel : public channel
     /** Fan mode */
     common::ventilation_fan_mode fan_mode_{
         common::ventilation_fan_mode::automatic};
+
+    /** Fan RPM setting */
+    common::ventilation_fan_mode fan_rpm_setting_{
+        common::ventilation_fan_mode::none};
 
     /** All but the latest deactivation timers are ignored */
     hydroctrl::common::task_id latest_deactivation_task_id_{0};

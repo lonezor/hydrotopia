@@ -84,6 +84,8 @@ void ventilation_fan_channel::hourly_tick()
     common::log(common::log_level::log_level_debug,
                 "[ventilation_fan_channel::hourly_tick]");
 
+    bool update_needed = channel_update_needed();
+
     // No action when power profile is 'off'
     if (power_profile() == common::power_consumption_profile::off) {
         return;
@@ -92,7 +94,8 @@ void ventilation_fan_channel::hourly_tick()
     // For continuous hourly operation, no reset is needed. The activation of
     // this power profile is always initiated by the user. Thus no need for
     // randomized delay. It is not timer driven.
-    if (power_profile() == common::power_consumption_profile::high) {
+    if (power_profile() == common::power_consumption_profile::high &&
+        !update_needed) {
         return;
     }
 
@@ -100,6 +103,34 @@ void ventilation_fan_channel::hourly_tick()
 
     auto bf = std::bind(&channel_activation_cb, std::placeholders::_1, this);
     ctx()->task_scheduler->register_single_task(start_delay, bf);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
+bool ventilation_fan_channel::channel_update_needed()
+{
+    auto cabinet_status = ctx()->cabinet_status;
+
+    // When not requesting 'off', fan RPM setting must be set
+    if (fan_rpm_setting_ == common::ventilation_fan_mode::none) {
+        return true;
+    }
+
+    // Upper limit reached but still using low RPM
+    if (fan_rpm_setting_ == common::ventilation_fan_mode::low &&
+        cabinet_status.cabinet_temperature.value() >
+            ventilation_fan_high_rpm_upper_threshold) {
+        return true;
+    }
+
+    // Lower limit reached but still using high RPM
+    if (fan_rpm_setting_ == common::ventilation_fan_mode::high &&
+        cabinet_status.cabinet_temperature.value() <
+            ventilation_fan_high_rpm_lower_threshold) {
+        return true;
+    }
+
+    return false;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -112,6 +143,12 @@ void ventilation_fan_channel::activate()
      * - Hourly trigger via system clock timer (evently spread delayed
      * activation due to channel concurrency)
      */
+
+    // Do not go through with deactivation + activation routine unless necessary
+    bool update_needed = channel_update_needed();
+    if (!update_needed) {
+        return;
+    }
 
     common::log(common::log_level::log_level_debug,
                 "[ventilation_fan_channel::activate]");
@@ -126,15 +163,61 @@ void ventilation_fan_channel::activate()
     switch (fan_mode_) {
     case common::ventilation_fan_mode::low: {
         ctx()->relay_module->activate(indexes.at(0));
+        fan_rpm_setting_ = common::ventilation_fan_mode::low;
+        std::stringstream ss_msg;
+        ss_msg << "[ventilation_fan_channel::activate] [manual] setting RPM to "
+                  "low";
+        common::log(common::log_level::log_level_debug, ss_msg.str());
         break;
     }
     case common::ventilation_fan_mode::high: {
         ctx()->relay_module->activate(indexes.at(1));
+        fan_rpm_setting_ = common::ventilation_fan_mode::high;
+        std::stringstream ss_msg;
+        ss_msg << "[ventilation_fan_channel::activate] [manual] setting RPM to "
+                  "high";
+        common::log(common::log_level::log_level_debug, ss_msg.str());
         break;
     }
     case common::ventilation_fan_mode::automatic: {
-        // Todo: temperature input
-        ctx()->relay_module->activate(indexes.at(0));
+        auto cabinet_status = ctx()->cabinet_status;
+
+        // Start on lowest setting
+        if (fan_rpm_setting_ == common::ventilation_fan_mode::none) {
+            ctx()->relay_module->activate(indexes.at(0));
+            fan_rpm_setting_ = common::ventilation_fan_mode::low;
+            std::stringstream ss_msg;
+            ss_msg << "[ventilation_fan_channel::activate] [automatic] setting "
+                      "initial RPM to low";
+            common::log(common::log_level::log_level_debug, ss_msg.str());
+            break;
+        }
+
+        // Exceeding upper threshold
+        if (fan_rpm_setting_ == common::ventilation_fan_mode::low &&
+            cabinet_status.cabinet_temperature.value() >
+                ventilation_fan_high_rpm_upper_threshold) {
+            ctx()->relay_module->activate(indexes.at(1));
+            fan_rpm_setting_ = common::ventilation_fan_mode::high;
+            std::stringstream ss_msg;
+            ss_msg << "[ventilation_fan_channel::activate] [automatic] setting "
+                      "RPM to high";
+            common::log(common::log_level::log_level_debug, ss_msg.str());
+            break;
+        }
+
+        // Lower limit reached but still using high RPM
+        if (fan_rpm_setting_ == common::ventilation_fan_mode::high &&
+            cabinet_status.cabinet_temperature.value() <
+                ventilation_fan_high_rpm_lower_threshold) {
+            ctx()->relay_module->activate(indexes.at(0));
+            fan_rpm_setting_ = common::ventilation_fan_mode::low;
+            std::stringstream ss_msg;
+            ss_msg << "[ventilation_fan_channel::activate] [automatic] setting "
+                      "RPM to low";
+            common::log(common::log_level::log_level_debug, ss_msg.str());
+            break;
+        }
         break;
     }
     default:

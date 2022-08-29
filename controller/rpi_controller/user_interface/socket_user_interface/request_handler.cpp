@@ -405,7 +405,12 @@ void request_handler::send_help_screen(
         << " - lower_water_pump_3_power_profile_hourly_05min" << std::endl
         << " - lower_water_pump_3_power_profile_hourly_15min" << std::endl
         << " - lower_water_pump_3_power_profile_hourly_30min" << std::endl
-        << " - lower_water_pump_3_power_profile_hourly_60min" << std::endl
+        << " - lower_water_pump_3_power_profile_hourly_60min"
+        << std::endl
+
+        // todo: until cabinet sensors are available
+        << " - development_cmd_cabinet_temperature_low" << std::endl
+        << " - development_cmd_cabinet_temperature_high" << std::endl
 
         << " - stats" << std::endl
         << std::endl;
@@ -652,6 +657,8 @@ void request_handler::handle_client_msg(
         (*ctx_->user_request_set_power_mode)(
             common::channel_type::lower_water_pump_3,
             common::power_consumption_profile::high);
+    } else if (msg.find("development_cmd") != std::string::npos) {
+        (*ctx_->user_request_development_cmd)(msg);
     } else if (msg.find("stats") != std::string::npos) {
         send_stats(sock);
     } else {
