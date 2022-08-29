@@ -28,8 +28,8 @@ class ventilation_fan_channel : public channel
 {
   public:
     /** Constructor */
-    explicit ventilation_fan_channel(
-        std::shared_ptr<common::controller_ctx> ctx);
+    ventilation_fan_channel(common::electrical_system electrical_system,
+                            std::shared_ptr<common::controller_ctx> ctx);
 
     /** Set fan mode */
     void set_fan_mode(common::ventilation_fan_mode mode);

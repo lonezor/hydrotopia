@@ -27,15 +27,25 @@ namespace common {
 
 //---------------------------------------------------------------------------------------------------------------------
 
-channel::channel(common::subsystem subsystem, common::channel_type channel_type,
+channel::channel(common::subsystem subsystem,
+                 common::electrical_system electrical_system,
+                 common::channel_type channel_type,
                  std::shared_ptr<common::controller_ctx> ctx)
-    : subsystem_(subsystem), channel_type_(channel_type), ctx_(ctx)
+    : subsystem_(subsystem), electrical_system_(electrical_system),
+      channel_type_(channel_type), ctx_(ctx)
 {
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 
 common::subsystem channel::subsystem() { return subsystem_; }
+
+//---------------------------------------------------------------------------------------------------------------------
+
+common::electrical_system channel::electrical_system()
+{
+    return electrical_system_;
+}
 
 //---------------------------------------------------------------------------------------------------------------------
 
@@ -76,12 +86,6 @@ void channel::set_power_consumption_profile(
     common::log(common::log_level::log_level_info, ss_msg.str());
 
     power_profile_ = profile;
-
-    if (power_profile_ == common::power_consumption_profile::off) {
-        deactivate();
-    } else {
-        activate();
-    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------

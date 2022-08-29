@@ -20,7 +20,6 @@
 
 #include <memory>
 
-#include <common/channel_collection.hpp>
 #include <common/configuration.hpp>
 #include <common/controller_ctx.hpp>
 #include <common/event.hpp>
@@ -61,10 +60,8 @@ class request_handler
      * @param config          Configuration
      * @param packet_engine   Packet engine
      */
-    request_handler(
-        std::shared_ptr<common::configuration> config,
-        std::shared_ptr<common::channel_collection> channel_collection,
-        std::shared_ptr<common::controller_ctx> ctx);
+    request_handler(std::shared_ptr<common::configuration> config,
+                    std::shared_ptr<common::controller_ctx> ctx);
 
     /** @brief Request handler execution loop
      */
@@ -130,9 +127,6 @@ class request_handler
 
     /** Server configuration */
     std::shared_ptr<common::configuration> config_;
-
-    /** Channel collection */
-    std::shared_ptr<common::channel_collection> channel_collection_;
 
     /** Controller context */
     std::shared_ptr<common::controller_ctx> ctx_;

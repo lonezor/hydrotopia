@@ -22,6 +22,7 @@
 
 using namespace mn::CppLinuxSerial;
 
+#include <common/channel_index.hpp>
 #include <common/string_processing/regex.hpp>
 #include <controller/controller.hpp>
 #include <user_interface/socket_user_interface/request_handler.hpp>
@@ -33,6 +34,9 @@ namespace controller {
 
 controller::controller(std::shared_ptr<common::configuration> cfg)
 {
+    /******************************************************************************************/
+    /*********************************** CONTEXT **********************************************/
+    /******************************************************************************************/
     ctx_ = std::make_shared<common::controller_ctx>();
     ctx_->mutex = std::make_shared<std::mutex>();
     ctx_->config = cfg;
@@ -42,70 +46,262 @@ controller::controller(std::shared_ptr<common::configuration> cfg)
     ctx_->task_scheduler = common::create_task_scheduler();
     ctx_->task_scheduler->set_mutex(ctx_->mutex);
 
+    auto f1 = std::bind(&user_request_set_ventilation_fan_mode,
+                        std::placeholders::_1, this);
+    ctx_->user_request_set_ventilation_fan_mode =
+        std::make_shared<std::function<void(common::ventilation_fan_mode)>>(f1);
+
+    auto f2 = std::bind(&user_request_set_power_profile, std::placeholders::_1,
+                        std::placeholders::_2, this);
+    ctx_->user_request_set_power_mode = std::make_shared<
+        std::function<void(common::channel_type channel_type,
+                           common::power_consumption_profile power_profile)>>(
+        f2);
+
+    request_handler_ =
+        std::make_shared<user_interface::request_handler>(cfg, ctx_);
+
     channel_collection_ = std::make_shared<common::channel_collection>();
 
-    auto e1 = std::make_shared<common::rotary_alarm_light_channel>(ctx_);
-    e1->set_relay_module_idx(
-        common::relay_channel_idx_rotary_alarm_light_channel);
-    channel_collection_->rotary_alarm_light = e1;
-    channel_collection_->all_channels.emplace_back(e1);
+    /******************************************************************************************/
+    /*********************************** AC 220-240 VOLT **************************************/
+    /******************************************************************************************/
 
-    auto e2 = std::make_shared<common::ventilation_fan_channel>(ctx_);
+    auto ch_a0 = std::make_shared<common::rotary_alarm_light_channel>(
+        common::electrical_system::ac_220_240_volt, ctx_);
+    ch_a0->set_relay_module_idx(
+        common::relay_channel_idx_rotary_alarm_light_channel);
+    channel_collection_->rotary_alarm_light = ch_a0;
+    channel_collection_->all_channels.emplace_back(ch_a0);
+
+    auto ch_a1 = std::make_shared<common::ventilation_fan_channel>(
+        common::electrical_system::ac_220_240_volt, ctx_);
     std::vector<int> relay_indexes;
     relay_indexes.emplace_back(
         common::relay_channel_idx_ventilation_fan_channel_low_rpm);
     relay_indexes.emplace_back(
         common::relay_channel_idx_ventilation_fan_channel_high_rpm);
-    e2->set_relay_module_idx(relay_indexes);
-    channel_collection_->ventilation_fan = e2;
-    channel_collection_->all_channels.emplace_back(e2);
+    ch_a1->set_relay_module_idx(relay_indexes);
+    channel_collection_->ventilation_fan = ch_a1;
+    channel_collection_->all_channels.emplace_back(ch_a1);
 
-    auto e3 = std::make_shared<common::full_spectrum_light_channel>(
+    auto ch_a2 = std::make_shared<common::full_spectrum_light_channel>(
+        common::electrical_system::ac_220_240_volt,
         common::channel_type::upper_full_spectrum_light, ctx_);
-    e3->set_relay_module_idx(
+    ch_a2->set_relay_module_idx(
         common::relay_channel_idx_upper_full_spectrum_light_channel);
-    channel_collection_->upper_full_spectrum_light = e3;
-    channel_collection_->all_channels.emplace_back(e3);
+    channel_collection_->upper_full_spectrum_light = ch_a2;
+    channel_collection_->all_channels.emplace_back(ch_a2);
 
-    auto e4 = std::make_shared<common::full_spectrum_light_channel>(
+    auto ch_a3 = std::make_shared<common::full_spectrum_light_channel>(
+        common::electrical_system::ac_220_240_volt,
         common::channel_type::lower_full_spectrum_light, ctx_);
-    e4->set_relay_module_idx(
+    ch_a3->set_relay_module_idx(
         common::relay_channel_idx_lower_full_spectrum_light_channel);
-    channel_collection_->lower_full_spectrum_light = e4;
-    channel_collection_->all_channels.emplace_back(e4);
+    channel_collection_->lower_full_spectrum_light = ch_a3;
+    channel_collection_->all_channels.emplace_back(ch_a3);
 
-    auto e5 = std::make_shared<common::water_pump_channel>(
-        common::channel_type::upper_water_pump_1, ctx_);
-    e5->set_relay_module_idx(common::relay_channel_idx_upper_water_pump_1);
-    channel_collection_->upper_water_pump_1 = e5;
-    channel_collection_->all_channels.emplace_back(e5);
-
-    auto e6 = std::make_shared<common::water_pump_channel>(
-        common::channel_type::upper_water_pump_2, ctx_);
-    e6->set_relay_module_idx(common::relay_channel_idx_upper_water_pump_2);
-    channel_collection_->upper_water_pump_2 = e6;
-    channel_collection_->all_channels.emplace_back(e6);
-
-    auto e7 = std::make_shared<common::water_pump_channel>(
+    auto ch_a4 = std::make_shared<common::water_pump_channel>(
+        common::electrical_system::ac_220_240_volt,
         common::channel_type::lower_water_pump_1, ctx_);
-    e7->set_relay_module_idx(common::relay_channel_idx_lower_water_pump_1);
-    channel_collection_->lower_water_pump_1 = e7;
-    channel_collection_->all_channels.emplace_back(e7);
+    ch_a4->set_relay_module_idx(common::relay_channel_idx_lower_water_pump_1);
+    channel_collection_->lower_water_pump_1 = ch_a4;
+    channel_collection_->all_channels.emplace_back(ch_a4);
 
-    auto e8 = std::make_shared<common::water_pump_channel>(
+    auto ch_a5 = std::make_shared<common::water_pump_channel>(
+        common::electrical_system::ac_220_240_volt,
         common::channel_type::lower_water_pump_2, ctx_);
-    e8->set_relay_module_idx(common::relay_channel_idx_lower_water_pump_2);
-    channel_collection_->lower_water_pump_2 = e8;
-    channel_collection_->all_channels.emplace_back(e8);
+    ch_a5->set_relay_module_idx(common::relay_channel_idx_lower_water_pump_2);
+    channel_collection_->lower_water_pump_2 = ch_a5;
+    channel_collection_->all_channels.emplace_back(ch_a5);
 
-    auto e9 = std::make_shared<common::water_pump_channel>(
+    auto ch_a6 = std::make_shared<common::water_pump_channel>(
+        common::electrical_system::ac_220_240_volt,
         common::channel_type::lower_water_pump_3, ctx_);
-    e9->set_relay_module_idx(common::relay_channel_idx_lower_water_pump_3);
-    channel_collection_->lower_water_pump_3 = e9;
-    channel_collection_->all_channels.emplace_back(e9);
+    ch_a6->set_relay_module_idx(common::relay_channel_idx_lower_water_pump_3);
+    channel_collection_->lower_water_pump_3 = ch_a6;
+    channel_collection_->all_channels.emplace_back(ch_a6);
 
-    request_handler_ = std::make_shared<user_interface::request_handler>(
-        cfg, channel_collection_, ctx_);
+    auto ch_a7 =
+        std::make_shared<common::step_down_voltage_transformer_channel>(
+            common::electrical_system::ac_220_240_volt,
+            common::channel_type::step_down_voltage_transformer, ctx_);
+    ch_a7->set_relay_module_idx(
+        common::relay_channel_idx_step_down_voltage_transformer);
+    channel_collection_->step_down_voltage_transformer = ch_a7;
+    channel_collection_->all_channels.emplace_back(ch_a7);
+
+    /******************************************************************************************/
+    /*********************************** AC 110-120 VOLT **************************************/
+    /******************************************************************************************/
+
+    auto ch_b0 = std::make_shared<common::water_pump_channel>(
+        common::electrical_system::ac_110_120_volt,
+        common::channel_type::upper_water_pump_1, ctx_);
+    ch_b0->set_relay_module_idx(common::relay_channel_idx_upper_water_pump_1);
+    channel_collection_->upper_water_pump_1 = ch_b0;
+    channel_collection_->all_channels.emplace_back(ch_b0);
+
+    auto ch_b1 = std::make_shared<common::water_pump_channel>(
+        common::electrical_system::ac_110_120_volt,
+        common::channel_type::upper_water_pump_2, ctx_);
+    ch_b1->set_relay_module_idx(common::relay_channel_idx_upper_water_pump_2);
+    channel_collection_->upper_water_pump_2 = ch_b1;
+    channel_collection_->all_channels.emplace_back(ch_b1);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
+void controller::refresh_transformer_state(controller *_this)
+{
+    auto channel_collection = _this->channel_collection_;
+
+    bool transformer_required = false;
+    for (auto &&ch : channel_collection->all_channels) {
+        auto power_profile = ch->power_profile();
+        auto electrical_system = ch->electrical_system();
+
+        if (electrical_system == common::electrical_system::ac_110_120_volt &&
+            power_profile != common::power_consumption_profile::off) {
+            transformer_required = true;
+        }
+    }
+
+    if (transformer_required) {
+        channel_collection->step_down_voltage_transformer->activate();
+    } else {
+        channel_collection->step_down_voltage_transformer->deactivate();
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
+void controller::user_request_set_ventilation_fan_mode(
+    common::ventilation_fan_mode fan_mode, controller *_this)
+{
+    auto channel_collection = _this->channel_collection_;
+    channel_collection->ventilation_fan->set_fan_mode(fan_mode);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+
+void controller::user_request_set_power_profile(
+    common::channel_type channel_type,
+    common::power_consumption_profile power_profile, controller *_this)
+{
+    auto channel_collection = _this->channel_collection_;
+
+    /******************************************************************************************/
+    /*********************************** AC 220-240 VOLT **************************************/
+    /******************************************************************************************/
+
+    switch (channel_type) {
+    case common::channel_type::rotary_alarm_light:
+        channel_collection->rotary_alarm_light->set_power_consumption_profile(
+            power_profile);
+
+        if (power_profile == common::power_consumption_profile::off) {
+            channel_collection->rotary_alarm_light->deactivate();
+        } else {
+            channel_collection->rotary_alarm_light->activate();
+        }
+        break;
+    case common::channel_type::ventilation_fan:
+        channel_collection->ventilation_fan->set_power_consumption_profile(
+            power_profile);
+
+        if (power_profile == common::power_consumption_profile::off) {
+            channel_collection->ventilation_fan->deactivate();
+        } else {
+            channel_collection->ventilation_fan->activate();
+        }
+        break;
+    case common::channel_type::upper_full_spectrum_light:
+        channel_collection->upper_full_spectrum_light
+            ->set_power_consumption_profile(power_profile);
+
+        if (power_profile == common::power_consumption_profile::off) {
+            channel_collection->upper_full_spectrum_light->deactivate();
+        } else {
+            channel_collection->upper_full_spectrum_light->activate();
+        }
+        break;
+    case common::channel_type::lower_full_spectrum_light:
+        channel_collection->lower_full_spectrum_light
+            ->set_power_consumption_profile(power_profile);
+
+        if (power_profile == common::power_consumption_profile::off) {
+            channel_collection->lower_full_spectrum_light->deactivate();
+        } else {
+            channel_collection->lower_full_spectrum_light->activate();
+        }
+        break;
+    case common::channel_type::lower_water_pump_1:
+        channel_collection->lower_water_pump_1->set_power_consumption_profile(
+            power_profile);
+
+        if (power_profile == common::power_consumption_profile::off) {
+            channel_collection->lower_water_pump_1->deactivate();
+        } else {
+            channel_collection->lower_water_pump_1->activate();
+        }
+        break;
+    case common::channel_type::lower_water_pump_2:
+        channel_collection->lower_water_pump_2->set_power_consumption_profile(
+            power_profile);
+
+        if (power_profile == common::power_consumption_profile::off) {
+            channel_collection->lower_water_pump_2->deactivate();
+        } else {
+            channel_collection->lower_water_pump_2->activate();
+        }
+        break;
+    case common::channel_type::lower_water_pump_3:
+        channel_collection->lower_water_pump_3->set_power_consumption_profile(
+            power_profile);
+
+        if (power_profile == common::power_consumption_profile::off) {
+            channel_collection->lower_water_pump_3->deactivate();
+        } else {
+            channel_collection->lower_water_pump_3->activate();
+        }
+        break;
+    default:
+        break;
+    }
+
+    /******************************************************************************************/
+    /*********************************** AC 110-120 VOLT **************************************/
+    /******************************************************************************************/
+
+    switch (channel_type) {
+    case common::channel_type::upper_water_pump_1:
+        channel_collection->upper_water_pump_1->set_power_consumption_profile(
+            power_profile);
+
+        refresh_transformer_state(_this);
+
+        if (power_profile == common::power_consumption_profile::off) {
+            channel_collection->upper_water_pump_1->deactivate();
+        } else {
+            channel_collection->upper_water_pump_1->activate();
+        }
+        break;
+    case common::channel_type::upper_water_pump_2:
+        channel_collection->upper_water_pump_2->set_power_consumption_profile(
+            power_profile);
+
+        refresh_transformer_state(_this);
+
+        if (power_profile == common::power_consumption_profile::off) {
+            channel_collection->upper_water_pump_2->deactivate();
+        } else {
+            channel_collection->upper_water_pump_2->activate();
+        }
+        break;
+    default:
+        break;
+    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -120,6 +316,10 @@ void controller::system_clock_tick_cb(common::task_context task_ctx,
 
     // New hour trigger point
     if (clock->hour_transition()) {
+        // Enable transformer when required
+        //  refresh_transformer_state(_this);
+
+        // Hourly tick
         for (auto &&ch : channel_collection->all_channels) {
             ch->hourly_tick();
         }

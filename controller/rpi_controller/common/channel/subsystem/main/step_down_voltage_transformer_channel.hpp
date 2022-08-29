@@ -25,23 +25,14 @@ namespace common {
 
 //---------------------------------------------------------------------------------------------------------------------
 
-class full_spectrum_light_channel : public channel
+class step_down_voltage_transformer_channel : public channel
 {
   public:
     /** Constructor */
-    full_spectrum_light_channel(common::electrical_system electrical_system,
-                                common::channel_type channel_type,
-                                std::shared_ptr<common::controller_ctx> ctx);
-
-    /** @brief Hourly tick
-     *
-     * The hourly tick is used to regulate activation:
-     *  - Activation at certain hour of the day (06:00)
-     *
-     * The hourly tick is used to regulate deactivation:
-     *  - Deactivation after power profile duration has been reached
-     */
-    void hourly_tick() final;
+    step_down_voltage_transformer_channel(
+        common::electrical_system electrical_system,
+        common::channel_type channel_type,
+        std::shared_ptr<common::controller_ctx> ctx);
 
     /** @brief Activate channel
      *
@@ -56,14 +47,6 @@ class full_spectrum_light_channel : public channel
     void deactivate() final;
 
   private:
-    /** Calculate duration of daily power profile */
-    std::chrono::hours
-    duration_of_daily_power_profile(common::power_consumption_profile profile);
-
-    /** Hours activated */
-    std::chrono::hours hours_activated_{std::chrono::hours(0)};
-
-    /** Activated */
     bool activated_{false};
 };
 

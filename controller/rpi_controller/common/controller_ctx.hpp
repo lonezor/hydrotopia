@@ -18,13 +18,17 @@
 
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <mutex>
 
+#include <common/channel_type.hpp>
 #include <common/configuration.hpp>
+#include <common/power_consumption.hpp>
 #include <common/relay_module/relay_module.hpp>
 #include <common/system_clock.hpp>
 #include <common/task_scheduler/task_scheduler_interface.hpp>
+#include <common/ventilation_fan.hpp>
 
 namespace hydroctrl {
 namespace common {
@@ -55,6 +59,22 @@ struct controller_ctx
     std::shared_ptr<common::relay_module> relay_module{nullptr};
     chassi_measurements chassi_status;
     bool system_wide_alarm_{false};
+
+    /** @brief Callback function: user_request_set_ventilation_fan_mode()
+     *
+     * @param fan_mode  Fan mode
+     */
+    std::shared_ptr<std::function<void(common::ventilation_fan_mode)>>
+        user_request_set_ventilation_fan_mode{nullptr};
+
+    /** @brief Callback function: user_request_set_power_mode()
+     *
+     * @param channel_type   Channel type
+     * @param power_profile  Power profile
+     */
+    std::shared_ptr<std::function<void(common::channel_type,
+                                       common::power_consumption_profile)>>
+        user_request_set_power_mode{nullptr};
 };
 
 //---------------------------------------------------------------------------------------------------------------------

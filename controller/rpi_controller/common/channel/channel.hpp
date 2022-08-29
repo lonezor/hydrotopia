@@ -23,6 +23,7 @@
 
 #include <common/channel_type.hpp>
 #include <common/controller_ctx.hpp>
+#include <common/electrical_system.hpp>
 #include <common/power_consumption.hpp>
 #include <common/subsystem.hpp>
 #include <common/task_scheduler/task_scheduler_interface.hpp>
@@ -52,11 +53,16 @@ constexpr std::chrono::milliseconds hourly_reset_randomization_period =
 class channel
 {
   public:
-    channel(common::subsystem subsystem, common::channel_type channel_type,
+    channel(common::subsystem subsystem,
+            common::electrical_system electrical_system,
+            common::channel_type channel_type,
             std::shared_ptr<common::controller_ctx> ctx);
 
     /** Get subsystem */
     common::subsystem subsystem();
+
+    /** Electrical system */
+    common::electrical_system electrical_system();
 
     /** Get channel type */
     common::channel_type channel_type();
@@ -142,6 +148,9 @@ class channel
 
     /** Sub system */
     common::subsystem subsystem_;
+
+    /** Electrical system */
+    common::electrical_system electrical_system_;
 
     /** Channel type */
     common::channel_type channel_type_;

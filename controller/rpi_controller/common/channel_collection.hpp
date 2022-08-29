@@ -22,9 +22,9 @@
 #include <vector>
 
 #include <common/channel/channel.hpp>
-
 #include <common/channel/subsystem/core/rotary_alarm_light_channel.hpp>
 #include <common/channel/subsystem/main/full_spectrum_light_channel.hpp>
+#include <common/channel/subsystem/main/step_down_voltage_transformer_channel.hpp>
 #include <common/channel/subsystem/main/ventilation_fan_channel.hpp>
 #include <common/channel/subsystem/main/water_pump_channel.hpp>
 
@@ -33,43 +33,14 @@ namespace common {
 
 //---------------------------------------------------------------------------------------------------------------------
 
-/** For now, the relay channels are hardcoded */
-
-/** Relay channel index for rotary alarm light */
-constexpr int relay_channel_idx_rotary_alarm_light_channel = 0;
-
-/** Relay channel index for ventilation fan: low rpm */
-constexpr int relay_channel_idx_ventilation_fan_channel_low_rpm = 1;
-
-/** Relay channel index for ventilation fan: high rpm */
-constexpr int relay_channel_idx_ventilation_fan_channel_high_rpm = 2;
-
-/** Relay channel index for upper full spectrum light */
-constexpr int relay_channel_idx_upper_full_spectrum_light_channel = 3;
-
-/** Relay channel index for lower full spectrum light */
-constexpr int relay_channel_idx_lower_full_spectrum_light_channel = 4;
-
-/** Relay channel index for upper water pump #1 */
-constexpr int relay_channel_idx_upper_water_pump_1 = 5;
-
-/** Relay channel index for upper water pump #2 */
-constexpr int relay_channel_idx_upper_water_pump_2 = 6;
-
-/** Relay channel index for lower water pump #1 */
-constexpr int relay_channel_idx_lower_water_pump_1 = 7;
-
-/** Relay channel index for lower water pump #2 */
-constexpr int relay_channel_idx_lower_water_pump_2 = 8;
-
-/** Relay channel index for lower water pump #3 */
-constexpr int relay_channel_idx_lower_water_pump_3 = 9;
-
-//---------------------------------------------------------------------------------------------------------------------
-
 /** Channel collection */
 struct channel_collection
 {
+    /******************************************************************************************
+     ********************************** AC 220-240 VOLT
+     ****************************************
+     *****************************************************************************************/
+
     /** Rotary alarm light channel */
     std::shared_ptr<rotary_alarm_light_channel> rotary_alarm_light;
 
@@ -82,12 +53,6 @@ struct channel_collection
     /** Lower full spectrum light channel */
     std::shared_ptr<full_spectrum_light_channel> lower_full_spectrum_light;
 
-    /** Upper water pump #1 */
-    std::shared_ptr<water_pump_channel> upper_water_pump_1;
-
-    /** Upper water pump #2 */
-    std::shared_ptr<water_pump_channel> upper_water_pump_2;
-
     /** Lower water pump #1 */
     std::shared_ptr<water_pump_channel> lower_water_pump_1;
 
@@ -96,6 +61,26 @@ struct channel_collection
 
     /** Lower water pump #3 */
     std::shared_ptr<water_pump_channel> lower_water_pump_3;
+
+    /** Step down voltage transformer */
+    std::shared_ptr<step_down_voltage_transformer_channel>
+        step_down_voltage_transformer;
+
+    /******************************************************************************************
+     ********************************** AC 110-120 VOLT
+     ****************************************
+     *****************************************************************************************/
+
+    /** Upper water pump #1 */
+    std::shared_ptr<water_pump_channel> upper_water_pump_1;
+
+    /** Upper water pump #2 */
+    std::shared_ptr<water_pump_channel> upper_water_pump_2;
+
+    /******************************************************************************************
+     ************************************* COMMON
+     **********************************************
+     *****************************************************************************************/
 
     /** Iterator friendly vector */
     std::vector<std::shared_ptr<channel>> all_channels;

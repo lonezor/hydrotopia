@@ -27,7 +27,8 @@ namespace common {
 class water_pump_channel : public channel
 {
   public:
-    water_pump_channel(common::channel_type channel_type,
+    water_pump_channel(common::electrical_system electrical_system,
+                       common::channel_type channel_type,
                        std::shared_ptr<common::controller_ctx> ctx);
 
     /** @brief Hourly tick

@@ -27,9 +27,11 @@ namespace common {
 //---------------------------------------------------------------------------------------------------------------------
 
 full_spectrum_light_channel::full_spectrum_light_channel(
+    common::electrical_system electrical_system,
     common::channel_type channel_type,
     std::shared_ptr<common::controller_ctx> ctx)
-    : channel::channel::channel(common::subsystem::main, channel_type, ctx)
+    : channel::channel::channel(common::subsystem::main, electrical_system,
+                                channel_type, ctx)
 {
 }
 

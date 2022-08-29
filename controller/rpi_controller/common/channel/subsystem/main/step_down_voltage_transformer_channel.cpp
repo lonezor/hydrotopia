@@ -17,8 +17,9 @@
  */
 
 #include <sstream>
+#include <thread>
 
-#include <common/channel/subsystem/core/rotary_alarm_light_channel.hpp>
+#include <common/channel/subsystem/main/step_down_voltage_transformer_channel.hpp>
 #include <common/log.hpp>
 
 namespace hydroctrl {
@@ -26,24 +27,25 @@ namespace common {
 
 //---------------------------------------------------------------------------------------------------------------------
 
-rotary_alarm_light_channel::rotary_alarm_light_channel(
+step_down_voltage_transformer_channel::step_down_voltage_transformer_channel(
     common::electrical_system electrical_system,
+    common::channel_type channel_type,
     std::shared_ptr<common::controller_ctx> ctx)
-    : channel::channel::channel(common::subsystem::core, electrical_system,
-                                common::channel_type::rotary_alarm_light, ctx)
+    : channel::channel(common::subsystem::main, electrical_system,
+                       common::channel_type::step_down_voltage_transformer, ctx)
 {
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 
-void rotary_alarm_light_channel::activate()
+void step_down_voltage_transformer_channel::activate()
 {
     if (activated_) {
         return;
     }
 
     common::log(common::log_level::log_level_debug,
-                "[rotary_alarm_light_channel::activate]");
+                "[step_down_voltage_transformer_channel::activate]");
 
     // activate relay
     auto indexes = relay_indexes();
@@ -51,30 +53,34 @@ void rotary_alarm_light_channel::activate()
         ctx()->relay_module->activate(indexes.at(0));
     } else {
         throw std::runtime_error(
-            "[rotary_alarm_light_channel::activate] critical error");
+            "[step_down_voltage_transformer_channel::activate] critical error");
     }
+
+    // Ensure the transformer is fully online before allowing other dependent
+    // channels to be activated
+    std::this_thread::sleep_for(std::chrono::seconds(5));
 
     activated_ = true;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 
-void rotary_alarm_light_channel::deactivate()
+void step_down_voltage_transformer_channel::deactivate()
 {
     if (!activated_) {
         return;
     }
 
     common::log(common::log_level::log_level_debug,
-                "[rotary_alarm_light_channel::deactivate]");
+                "[step_down_voltage_transformer_channel::deactivate]");
 
     // deactivate relay
     auto indexes = relay_indexes();
     if (indexes.size() == 1) {
         ctx()->relay_module->deactivate(indexes.at(0));
     } else {
-        throw std::runtime_error(
-            "[rotary_alarm_light_channel::deactivate] critical error");
+        throw std::runtime_error("[step_down_voltage_transformer_channel::"
+                                 "deactivate] critical error");
     }
 
     activated_ = false;

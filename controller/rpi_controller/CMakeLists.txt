@@ -9,6 +9,8 @@ add_executable(hydroctrl
     common/channel/subsystem/core/rotary_alarm_light_channel.hpp
     common/channel/subsystem/main/full_spectrum_light_channel.cpp
     common/channel/subsystem/main/full_spectrum_light_channel.hpp
+    common/channel/subsystem/main/step_down_voltage_transformer_channel.cpp
+    common/channel/subsystem/main/step_down_voltage_transformer_channel.hpp
     common/channel/subsystem/main/ventilation_fan_channel.cpp
     common/channel/subsystem/main/ventilation_fan_channel.hpp
     common/channel/subsystem/main/water_pump_channel.cpp

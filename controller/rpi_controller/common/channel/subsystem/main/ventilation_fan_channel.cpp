@@ -29,9 +29,10 @@ namespace common {
 //---------------------------------------------------------------------------------------------------------------------
 
 ventilation_fan_channel::ventilation_fan_channel(
+    common::electrical_system electrical_system,
     std::shared_ptr<common::controller_ctx> ctx)
-    : channel::channel::channel(common::subsystem::main,
-                                common::channel_type::ventilation_fan, ctx)
+    : channel::channel(common::subsystem::main, electrical_system,
+                       common::channel_type::ventilation_fan, ctx)
 {
 }
 

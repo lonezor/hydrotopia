@@ -4,5 +4,6 @@ BreakBeforeBraces: Mozilla
 IndentWidth: '4'
 SortIncludes: 'true'
 UseTab: Never
+ReflowComments: false
 
 ...

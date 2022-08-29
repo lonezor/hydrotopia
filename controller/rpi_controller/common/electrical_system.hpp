@@ -16,33 +16,24 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>
  */
 
-#include <common/channel/channel.hpp>
+#pragma once
+
+#include <string>
 
 namespace hydroctrl {
 namespace common {
 
 //---------------------------------------------------------------------------------------------------------------------
 
-class rotary_alarm_light_channel : public channel
+enum class electrical_system
 {
-  public:
-    rotary_alarm_light_channel(common::electrical_system electrical_system,
-                               std::shared_ptr<common::controller_ctx> ctx);
+    unknown,
 
-    /** @brief Activate channel
-     *
-     * Immediate channel activation.
-     */
-    void activate() final;
+    /** AC 110-120 Volt */
+    ac_110_120_volt,
 
-    /** @brief Deactivate channel
-     *
-     * Immediate channel deactivation
-     */
-    void deactivate() final;
-
-  private:
-    bool activated_{false};
+    /** AC 220-240 Volt */
+    ac_220_240_volt,
 };
 
 //---------------------------------------------------------------------------------------------------------------------

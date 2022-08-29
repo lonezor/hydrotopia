@@ -47,6 +47,16 @@ class controller
 
     static void serial_console_thread_main(controller *_this);
 
+    static void refresh_transformer_state(controller *_this);
+
+    static void
+    user_request_set_ventilation_fan_mode(common::ventilation_fan_mode fan_mode,
+                                          controller *_this);
+
+    static void user_request_set_power_profile(
+        common::channel_type channel_type,
+        common::power_consumption_profile power_profile, controller *_this);
+
     std::shared_ptr<common::controller_ctx> ctx_{nullptr};
 
     std::shared_ptr<common::channel_collection> channel_collection_{nullptr};

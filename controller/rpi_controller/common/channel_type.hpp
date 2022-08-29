@@ -67,6 +67,9 @@ enum class channel_type
     /** Lower water pump #3 */
     lower_water_pump_3,
 
+    /** Step down voltage transformer */
+    step_down_voltage_transformer,
+
     /*****************************************************************************
      ****************************** EXTRA SUBSYSTEM
      ********************************
