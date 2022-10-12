@@ -342,7 +342,7 @@ void controller::system_clock_tick_cb(common::task_context task_ctx,
     // New hour trigger point
     if (clock->hour_transition()) {
         // Enable transformer when required
-        //  refresh_transformer_state(_this);
+        refresh_transformer_state(_this);
 
         // Hourly tick
         for (auto &&ch : channel_collection->all_channels) {

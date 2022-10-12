@@ -32,8 +32,7 @@ full_spectrum_light_channel::full_spectrum_light_channel(
     std::shared_ptr<common::controller_ctx> ctx)
     : channel::channel::channel(common::subsystem::main, electrical_system,
                                 channel_type, ctx)
-{
-}
+{}
 
 //---------------------------------------------------------------------------------------------------------------------
 
@@ -60,9 +59,6 @@ std::chrono::hours full_spectrum_light_channel::duration_of_daily_power_profile(
 void full_spectrum_light_channel::hourly_tick()
 {
     auto hour = ctx()->clock->hour();
-
-    constexpr int six_in_the_morning = 6;
-    constexpr int midnight = 0;
 
     // If not active, follow schedule
     if (!activated_) {

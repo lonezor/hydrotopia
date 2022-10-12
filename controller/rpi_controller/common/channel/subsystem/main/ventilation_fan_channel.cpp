@@ -33,8 +33,7 @@ ventilation_fan_channel::ventilation_fan_channel(
     std::shared_ptr<common::controller_ctx> ctx)
     : channel::channel(common::subsystem::main, electrical_system,
                        common::channel_type::ventilation_fan, ctx)
-{
-}
+{}
 
 //---------------------------------------------------------------------------------------------------------------------
 
@@ -85,6 +84,13 @@ void ventilation_fan_channel::hourly_tick()
                 "[ventilation_fan_channel::hourly_tick]");
 
     bool update_needed = channel_update_needed();
+
+    auto hour = ctx()->clock->hour();
+
+    // No action during night time: 00:00 - 05:59
+    if (hour >= midnight && hour < six_in_the_morning) {
+        return;
+    }
 
     // No action when power profile is 'off'
     if (power_profile() == common::power_consumption_profile::off) {

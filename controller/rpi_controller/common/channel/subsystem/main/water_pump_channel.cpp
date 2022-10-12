@@ -32,8 +32,7 @@ water_pump_channel::water_pump_channel(
     std::shared_ptr<common::controller_ctx> ctx)
     : channel::channel(common::subsystem::main, electrical_system, channel_type,
                        ctx)
-{
-}
+{}
 
 //---------------------------------------------------------------------------------------------------------------------
 
@@ -69,6 +68,13 @@ void water_pump_channel::hourly_tick()
 {
     common::log(common::log_level::log_level_debug,
                 "[water_pump_channel::hourly_tick]");
+
+    auto hour = ctx()->clock->hour();
+
+    // No action during night time: 00:00 - 05:59
+    if (hour >= midnight && hour < six_in_the_morning) {
+        return;
+    }
 
     // No action when power profile is 'off'
     if (power_profile() == common::power_consumption_profile::off) {

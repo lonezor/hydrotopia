@@ -47,6 +47,10 @@ namespace common {
 constexpr std::chrono::milliseconds hourly_reset_randomization_period =
     std::chrono::milliseconds(3 * 60 * 1000);
 
+constexpr int six_in_the_morning = 6;
+
+constexpr int midnight = 0;
+
 //---------------------------------------------------------------------------------------------------------------------
 
 /** Channel */
