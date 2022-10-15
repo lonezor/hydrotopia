@@ -36,8 +36,11 @@
 #define PIN_DHT_01 (39)
 #define PIN_DHT_02 (40)
 
+#define TEMP_FAN_ACTIVATION_THRESHOLD (25)
+#define TEMP_FAN_DEACTIVATION_THRESHOLD (23)
 #define TEMP_WARNING_THRESHOLD (30)
 #define TEMP_ERROR_THRESHOLD (40)
+
 
 #define DHT_TYPE (DHT22) // DHT 22 (AM2302)
 
@@ -55,6 +58,7 @@ int g_alarm = FALSE;
 int g_door_alarm = FALSE;
 int g_chassi_temp_alarm = FALSE;
 int g_chassi_temp_warning = FALSE;
+int g_temperature_controlled_fan_activation = TRUE;
 
 int g_iteration_ind_flag = 1;
 unsigned long g_iteration_counter = 0;
@@ -115,128 +119,171 @@ void setup() {
 }
 
 void loop() {
+  // Safety:
+  // Wait for the device to settle after a power cycle
+  // before reading and reacting. It can also be triggered
+  // when the other side opens/resets the serial device
+  if (g_iteration_counter > 50) {
+      /********************************************************
+       ******************** SENSOR INPUT **********************
+      ********************************************************/
+      
+      int fan_button_01 = digitalRead(PIN_FAN_BUTTON_01);
+      int fan_button_02 = digitalRead(PIN_FAN_BUTTON_02);
 
-  /********************************************************
-   ******************** SENSOR INPUT **********************
-   ********************************************************/
-   
-  int fan_button_01 = digitalRead(PIN_FAN_BUTTON_01);
-  
-  int fan_button_02 = digitalRead(PIN_FAN_BUTTON_02);
-  
-  int door_sensor = digitalRead(PIN_DOOR_SENSOR);
+      // Fans are designed to operate mainly as one active
+      // and using the second as an offline spare. However,
+      // when both are activated the intention is to go
+      // for maximum with no concern of wearing it down
+      // prematurely. Disable temperature control both
+      // for safety in case of unreliable temperature
+      // input as well as making it easy to test fan
+      // operation
+      if (fan_button_01 == LOW &&
+          fan_button_02 == LOW) {
+        g_temperature_controlled_fan_activation = FALSE;
+      }
+      
+      int door_sensor = digitalRead(PIN_DOOR_SENSOR);
 
-  // DHT Temperature #1
-  sensors_event_t event;
-  dht_01.temperature().getEvent(&event);
-  if (isnan(event.temperature)) {
-    dht_01_temperature = 0;
-  } else {
-    dht_01_temperature = (int)(event.temperature * 100);
-  }
-
-  // DHT Temperature #2
-  dht_02.temperature().getEvent(&event);
-  if (isnan(event.temperature)) {
-    dht_02_temperature = 0;
-  } else {
-    dht_02_temperature = (int)(event.temperature * 100);
-  }
-
-  // DHT Humidity #1
-  dht_01.humidity().getEvent(&event);
-  if (isnan(event.relative_humidity)) {
-    dht_01_humidity = 0;
-  } else {
-    dht_01_humidity = (int)(event.relative_humidity  * 100);
-  }
-  
-  // DHT Humidity #2
-  dht_02.humidity().getEvent(&event);
-  if (isnan(event.relative_humidity)) {
-    dht_02_humidity = 0;
-  } else {
-    dht_02_humidity = (int)(event.relative_humidity  * 100);
-  }
-
-  /********************************************************
-   ******************** REACT TO INPUT ********************
-   ********************************************************/
-  
-  if (fan_button_01 == LOW) {
-      enable_relay(PIN_RELAY_FAN_01);
-      digitalWrite(PIN_LED_FAN_01, HIGH);
-  } else {
-      disable_relay(PIN_RELAY_FAN_01);
-      digitalWrite(PIN_LED_FAN_01, LOW);
-  }
-
-  if (fan_button_02 == LOW) {
-      enable_relay(PIN_RELAY_FAN_02);
-      digitalWrite(PIN_LED_FAN_02, HIGH);
-  } else {
-      disable_relay(PIN_RELAY_FAN_02);
-      digitalWrite(PIN_LED_FAN_02, LOW);
-  }
-
-  // Door open: Open circuit --> pullup
-  if (door_sensor == HIGH) {
-    g_door_alarm = TRUE;
-  } else {
-    g_door_alarm = FALSE;
-  }
-
-  // Chassi temperature error condition
-  if (dht_02_temperature / 100 >= TEMP_ERROR_THRESHOLD) {
-    g_chassi_temp_alarm = TRUE;
-  } else {
-    g_chassi_temp_alarm = FALSE;
-  }
-
-  // Chassi temperature warning condition
-  if (dht_02_temperature / 100 >= TEMP_WARNING_THRESHOLD) {
-    g_chassi_temp_warning = TRUE;
-  } else {
-    g_chassi_temp_warning = FALSE;
-  }
-  
-  if (g_door_alarm || g_chassi_temp_alarm) {
-      enable_relay(PIN_RELAY_ALARM);
-      g_alarm = TRUE;
-  } else {
-      disable_relay(PIN_RELAY_ALARM);
-      g_alarm = FALSE;
-  }
-
-  if (g_chassi_temp_warning && !g_alarm) {
-       digitalWrite(PIN_LED_WARNING, HIGH);
-  } else {
-      digitalWrite(PIN_LED_WARNING, LOW);
-  }
- 
-   /********************************************************
-   ************** COMMUNICATE STATUS ***********************
-   ********************************************************/
-
-  if (g_iteration_counter % 10 == 0) {
-      g_iteration_ind_flag = !g_iteration_ind_flag;
-      if (g_iteration_ind_flag) {
-        digitalWrite(PIN_LED_ITERATION_IND, HIGH);   
+      // DHT Temperature #1
+      sensors_event_t event;
+      dht_01.temperature().getEvent(&event);
+      if (isnan(event.temperature)) {
+        dht_01_temperature = 0;
       } else {
-        digitalWrite(PIN_LED_ITERATION_IND, LOW);   
+        dht_01_temperature = (int)(event.temperature * 100);
       }
 
-    char status[1024];
-    snprintf(status, sizeof(status), "temp=%d.%d, temp2=%d.%d, humidity=%d.%d, humidity2=%d.%d, door_alarm=%d, chassi_temp_warning=%d, chassi_temp_alarm=%d;",
-      dht_01_temperature / 100, dht_01_temperature % 100,
-      dht_02_temperature / 100, dht_02_temperature % 100,
-      dht_01_humidity / 100, dht_01_humidity % 100,
-      dht_02_humidity / 100, dht_02_humidity % 100,
-      g_door_alarm,
-      g_chassi_temp_warning,
-      g_chassi_temp_alarm);
+      // DHT Temperature #2
+      dht_02.temperature().getEvent(&event);
+      if (isnan(event.temperature)) {
+        dht_02_temperature = 0;
+      } else {
+        dht_02_temperature = (int)(event.temperature * 100);
+      }
+
+      // DHT Humidity #1
+      dht_01.humidity().getEvent(&event);
+      if (isnan(event.relative_humidity)) {
+        dht_01_humidity = 0;
+      } else {
+        dht_01_humidity = (int)(event.relative_humidity  * 100);
+      }
+      
+      // DHT Humidity #2
+      dht_02.humidity().getEvent(&event);
+      if (isnan(event.relative_humidity)) {
+        dht_02_humidity = 0;
+      } else {
+        dht_02_humidity = (int)(event.relative_humidity  * 100);
+      }
+
+      /********************************************************
+       ******************** REACT TO INPUT ********************
+      ********************************************************/
+      
+      if (fan_button_01 == LOW) {
+          if (g_temperature_controlled_fan_activation) {
+            if (dht_01_temperature / 100 > TEMP_FAN_ACTIVATION_THRESHOLD) {
+              enable_relay(PIN_RELAY_FAN_01);
+            } 
+          } else {
+            enable_relay(PIN_RELAY_FAN_01);
+          }
+          digitalWrite(PIN_LED_FAN_01, HIGH);
+      } else {
+          if (g_temperature_controlled_fan_activation) {
+            if (dht_01_temperature / 100 < TEMP_FAN_DEACTIVATION_THRESHOLD) {
+              disable_relay(PIN_RELAY_FAN_01);
+            }
+          } else {
+            disable_relay(PIN_RELAY_FAN_01);
+          }
+          
+          digitalWrite(PIN_LED_FAN_01, LOW);
+      }
+
+      if (fan_button_02 == LOW) {
+        if (g_temperature_controlled_fan_activation) {
+            if (dht_01_temperature / 100 > TEMP_FAN_ACTIVATION_THRESHOLD) {
+              enable_relay(PIN_RELAY_FAN_02);
+            } 
+        } else {
+          enable_relay(PIN_RELAY_FAN_02);
+        }
+        digitalWrite(PIN_LED_FAN_02, HIGH);
+      } else {
+        if (g_temperature_controlled_fan_activation) {
+          if (dht_01_temperature / 100 < TEMP_FAN_DEACTIVATION_THRESHOLD) {
+            disable_relay(PIN_RELAY_FAN_02);
+          }
+        } else {
+          disable_relay(PIN_RELAY_FAN_02);
+        }
+        
+        digitalWrite(PIN_LED_FAN_02, LOW);
+      }
+
+      // Door open: Open circuit --> pullup
+      if (door_sensor == HIGH) {
+        g_door_alarm = TRUE;
+      } else {
+        g_door_alarm = FALSE;
+      }
+
+      // Chassi temperature error condition
+      if (dht_02_temperature / 100 >= TEMP_ERROR_THRESHOLD) {
+        g_chassi_temp_alarm = TRUE;
+      } else {
+        g_chassi_temp_alarm = FALSE;
+      }
+
+      // Chassi temperature warning condition
+      if (dht_02_temperature / 100 >= TEMP_WARNING_THRESHOLD) {
+        g_chassi_temp_warning = TRUE;
+      } else {
+        g_chassi_temp_warning = FALSE;
+      }
+      
+      if (g_door_alarm || g_chassi_temp_alarm) {
+          enable_relay(PIN_RELAY_ALARM);
+          g_alarm = TRUE;
+      } else {
+          disable_relay(PIN_RELAY_ALARM);
+          g_alarm = FALSE;
+      }
+
+      if (g_chassi_temp_warning && !g_alarm) {
+          digitalWrite(PIN_LED_WARNING, HIGH);
+      } else {
+          digitalWrite(PIN_LED_WARNING, LOW);
+      }
     
-    Serial.println(status);
+      /********************************************************
+       ************** COMMUNICATE STATUS ***********************
+      ********************************************************/
+
+      if (g_iteration_counter % 10 == 0) {
+          g_iteration_ind_flag = !g_iteration_ind_flag;
+          if (g_iteration_ind_flag) {
+            digitalWrite(PIN_LED_ITERATION_IND, HIGH);   
+          } else {
+            digitalWrite(PIN_LED_ITERATION_IND, LOW);   
+          }
+
+        char status[1024];
+        snprintf(status, sizeof(status), "temp=%d.%d, temp2=%d.%d, humidity=%d.%d, humidity2=%d.%d, door_alarm=%d, chassi_temp_warning=%d, chassi_temp_alarm=%d;",
+          dht_01_temperature / 100, dht_01_temperature % 100,
+          dht_02_temperature / 100, dht_02_temperature % 100,
+          dht_01_humidity / 100, dht_01_humidity % 100,
+          dht_02_humidity / 100, dht_02_humidity % 100,
+          g_door_alarm,
+          g_chassi_temp_warning,
+          g_chassi_temp_alarm);
+        
+        Serial.println(status);
+      }
   }
 
    /********************************************************
