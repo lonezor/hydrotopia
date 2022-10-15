@@ -183,45 +183,37 @@ void loop() {
        ******************** REACT TO INPUT ********************
       ********************************************************/
       
+      // User has requested fan activation
       if (fan_button_01 == LOW) {
           if (g_temperature_controlled_fan_activation) {
             if (dht_01_temperature / 100 > TEMP_FAN_ACTIVATION_THRESHOLD) {
               enable_relay(PIN_RELAY_FAN_01);
-            } 
+            } else if (dht_01_temperature / 100 < TEMP_FAN_DEACTIVATION_THRESHOLD) {
+              disable_relay(PIN_RELAY_FAN_01);
+            }
           } else {
             enable_relay(PIN_RELAY_FAN_01);
           }
           digitalWrite(PIN_LED_FAN_01, HIGH);
       } else {
-          if (g_temperature_controlled_fan_activation) {
-            if (dht_01_temperature / 100 < TEMP_FAN_DEACTIVATION_THRESHOLD) {
-              disable_relay(PIN_RELAY_FAN_01);
-            }
-          } else {
-            disable_relay(PIN_RELAY_FAN_01);
-          }
-          
-          digitalWrite(PIN_LED_FAN_01, LOW);
+        disable_relay(PIN_RELAY_FAN_01);
+        digitalWrite(PIN_LED_FAN_01, LOW);
       }
 
+      // User has requested fan activation
       if (fan_button_02 == LOW) {
         if (g_temperature_controlled_fan_activation) {
-            if (dht_01_temperature / 100 > TEMP_FAN_ACTIVATION_THRESHOLD) {
-              enable_relay(PIN_RELAY_FAN_02);
-            } 
+          if (dht_01_temperature / 100 > TEMP_FAN_ACTIVATION_THRESHOLD) {
+            enable_relay(PIN_RELAY_FAN_02);
+          } else if (dht_01_temperature / 100 < TEMP_FAN_DEACTIVATION_THRESHOLD) {
+            disable_relay(PIN_RELAY_FAN_02);
+          }
         } else {
           enable_relay(PIN_RELAY_FAN_02);
         }
         digitalWrite(PIN_LED_FAN_02, HIGH);
       } else {
-        if (g_temperature_controlled_fan_activation) {
-          if (dht_01_temperature / 100 < TEMP_FAN_DEACTIVATION_THRESHOLD) {
-            disable_relay(PIN_RELAY_FAN_02);
-          }
-        } else {
-          disable_relay(PIN_RELAY_FAN_02);
-        }
-        
+        disable_relay(PIN_RELAY_FAN_02);
         digitalWrite(PIN_LED_FAN_02, LOW);
       }
 
