@@ -122,6 +122,9 @@ std::chrono::milliseconds channel::duration_of_hourly_power_profile(
     common::power_consumption_profile profile)
 {
     switch (profile) {
+    case common::power_consumption_profile::continuous:
+        return std::chrono::milliseconds(
+            common::hourly_power_consumption_profile_continuous.count() * 1000);
     case common::power_consumption_profile::high:
         return std::chrono::milliseconds(
             common::hourly_power_consumption_profile_high.count() * 1000);
@@ -145,7 +148,7 @@ std::chrono::milliseconds channel::duration_of_hourly_power_profile(
 std::chrono::milliseconds channel::determine_activation_duration(
     common::power_consumption_profile profile)
 {
-    if (profile == common::power_consumption_profile::high) {
+    if (profile == common::power_consumption_profile::continuous) {
         return std::chrono::milliseconds(0);
     }
 

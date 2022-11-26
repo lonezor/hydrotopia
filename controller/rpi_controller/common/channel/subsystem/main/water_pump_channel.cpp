@@ -84,7 +84,7 @@ void water_pump_channel::hourly_tick()
     // For continuous hourly operation, no reset is needed. The activation of
     // this power profile is always initiated by the user. Thus no need for
     // randomized delay. It is not timer driven.
-    if (power_profile() == common::power_consumption_profile::high) {
+    if (power_profile() == common::power_consumption_profile::continuous) {
         return;
     }
 
@@ -119,7 +119,7 @@ void water_pump_channel::activate()
 
     // Set deactivation timer, but not for durations filling up the entire time
     // window
-    if (power_profile() != common::power_consumption_profile::high) {
+    if (power_profile() != common::power_consumption_profile::continuous) {
         auto duration = determine_activation_duration(power_profile());
         auto bf =
             std::bind(&channel_deactivation_cb, std::placeholders::_1, this);

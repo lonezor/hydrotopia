@@ -33,26 +33,32 @@ namespace common {
  */
 enum class power_consumption_profile
 {
+    /** Initializer value */
     unknown,
 
-    /** @brief High: No actions taken to reduce power consumption
+    /** @brief Continuous: No actions taken to reduce power consumption
+     *
+     * Maximum performance. System running with optimal settings */
+    continuous,
+
+    /** @brief High: First level of power reduction actions
      *
      * Maximum performance. System running with optimal settings */
     high,
 
-    /** Medium: First level of power reduction actions */
+    /** @brief Medium: Second level of power reduction actions */
     medium,
 
-    /** Medium: Second level of power reduction actions */
+    /** @brief Low: Third level of power reduction actions */
     low,
 
-    /** @brief Medium: Third level of power reduction actions
+    /** @brief Emergency: Forth level of power reduction actions
      *
      * Running at very low settings, minimum performance in a situation where
      * power availability is critical */
     emergency,
 
-    /** Intentional power off (disabled) */
+    /** Intentional power off */
     off,
 };
 
@@ -82,10 +88,14 @@ constexpr std::chrono::hours light_power_consumption_profile_emergency =
 
 //---------------------------------------------------------------------------------------------------------------------
 
-/** High hourly power consumption profile: Full 60 min operation per hour
+/** Continuous hourly power consumption profile: Full 60 min operation per hour
  * (daytime continuous operation) */
-constexpr std::chrono::seconds hourly_power_consumption_profile_high =
+constexpr std::chrono::seconds hourly_power_consumption_profile_continuous =
     std::chrono::seconds(60 * 60);
+
+/** High hourly power consumption profile: 45 min operation per hour */
+constexpr std::chrono::seconds hourly_power_consumption_profile_high =
+    std::chrono::seconds(60 * 45);
 
 /** Medium hourly power consumption profile: 30 min operation per hour */
 constexpr std::chrono::seconds hourly_power_consumption_profile_medium =

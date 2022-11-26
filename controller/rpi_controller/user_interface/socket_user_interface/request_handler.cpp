@@ -363,6 +363,7 @@ void request_handler::send_help_screen(
         << " - ventilation_fan_power_profile_hourly_05min" << std::endl
         << " - ventilation_fan_power_profile_hourly_15min" << std::endl
         << " - ventilation_fan_power_profile_hourly_30min" << std::endl
+        << " - ventilation_fan_power_profile_hourly_45min" << std::endl
         << " - ventilation_fan_power_profile_hourly_60min" << std::endl
 
         << " - upper_full_spectrum_light_power_profile_off" << std::endl
@@ -381,30 +382,35 @@ void request_handler::send_help_screen(
         << " - upper_water_pump_1_power_profile_hourly_05min" << std::endl
         << " - upper_water_pump_1_power_profile_hourly_15min" << std::endl
         << " - upper_water_pump_1_power_profile_hourly_30min" << std::endl
+        << " - upper_water_pump_1_power_profile_hourly_45min" << std::endl
         << " - upper_water_pump_1_power_profile_hourly_60min" << std::endl
 
         << " - upper_water_pump_2_power_profile_off" << std::endl
         << " - upper_water_pump_2_power_profile_hourly_05min" << std::endl
         << " - upper_water_pump_2_power_profile_hourly_15min" << std::endl
         << " - upper_water_pump_2_power_profile_hourly_30min" << std::endl
+        << " - upper_water_pump_2_power_profile_hourly_45min" << std::endl
         << " - upper_water_pump_2_power_profile_hourly_60min" << std::endl
 
         << " - lower_water_pump_1_power_profile_off" << std::endl
         << " - lower_water_pump_1_power_profile_hourly_05min" << std::endl
         << " - lower_water_pump_1_power_profile_hourly_15min" << std::endl
         << " - lower_water_pump_1_power_profile_hourly_30min" << std::endl
+        << " - lower_water_pump_1_power_profile_hourly_45min" << std::endl
         << " - lower_water_pump_1_power_profile_hourly_60min" << std::endl
 
         << " - lower_water_pump_2_power_profile_off" << std::endl
         << " - lower_water_pump_2_power_profile_hourly_05min" << std::endl
         << " - lower_water_pump_2_power_profile_hourly_15min" << std::endl
         << " - lower_water_pump_2_power_profile_hourly_30min" << std::endl
+        << " - lower_water_pump_2_power_profile_hourly_45min" << std::endl
         << " - lower_water_pump_2_power_profile_hourly_60min" << std::endl
 
         << " - lower_water_pump_3_power_profile_off" << std::endl
         << " - lower_water_pump_3_power_profile_hourly_05min" << std::endl
         << " - lower_water_pump_3_power_profile_hourly_15min" << std::endl
         << " - lower_water_pump_3_power_profile_hourly_30min" << std::endl
+        << " - lower_water_pump_3_power_profile_hourly_45min" << std::endl
         << " - lower_water_pump_3_power_profile_hourly_60min"
         << std::endl
 
@@ -463,11 +469,16 @@ void request_handler::handle_client_msg(
         (*ctx_->user_request_set_power_mode)(
             common::channel_type::ventilation_fan,
             common::power_consumption_profile::medium);
-    } else if (msg.find("ventilation_fan_power_profile_hourly_60min") !=
+    } else if (msg.find("ventilation_fan_power_profile_hourly_45min") !=
                std::string::npos) {
         (*ctx_->user_request_set_power_mode)(
             common::channel_type::ventilation_fan,
             common::power_consumption_profile::high);
+    } else if (msg.find("ventilation_fan_power_profile_hourly_60min") !=
+               std::string::npos) {
+        (*ctx_->user_request_set_power_mode)(
+            common::channel_type::ventilation_fan,
+            common::power_consumption_profile::continuous);
 
         /***** Upper Full Spectrum Light Power Profile *****/
     } else if (msg.find("upper_full_spectrum_light_power_profile_off") !=
@@ -544,11 +555,16 @@ void request_handler::handle_client_msg(
         (*ctx_->user_request_set_power_mode)(
             common::channel_type::upper_water_pump_1,
             common::power_consumption_profile::medium);
-    } else if (msg.find("upper_water_pump_1_power_profile_hourly_60min") !=
+    } else if (msg.find("upper_water_pump_1_power_profile_hourly_45min") !=
                std::string::npos) {
         (*ctx_->user_request_set_power_mode)(
             common::channel_type::upper_water_pump_1,
             common::power_consumption_profile::high);
+    } else if (msg.find("upper_water_pump_1_power_profile_hourly_60min") !=
+               std::string::npos) {
+        (*ctx_->user_request_set_power_mode)(
+            common::channel_type::upper_water_pump_1,
+            common::power_consumption_profile::continuous);
 
         /***** Upper Water Pump #2 Power Profile *****/
     } else if (msg.find("upper_water_pump_2_power_profile_off") !=
@@ -571,11 +587,16 @@ void request_handler::handle_client_msg(
         (*ctx_->user_request_set_power_mode)(
             common::channel_type::upper_water_pump_2,
             common::power_consumption_profile::medium);
-    } else if (msg.find("upper_water_pump_2_power_profile_hourly_60min") !=
+    } else if (msg.find("upper_water_pump_2_power_profile_hourly_45min") !=
                std::string::npos) {
         (*ctx_->user_request_set_power_mode)(
             common::channel_type::upper_water_pump_2,
             common::power_consumption_profile::high);
+    } else if (msg.find("upper_water_pump_2_power_profile_hourly_60min") !=
+               std::string::npos) {
+        (*ctx_->user_request_set_power_mode)(
+            common::channel_type::upper_water_pump_2,
+            common::power_consumption_profile::continuous);
 
         /***** Lower Water Pump #1 Power Profile *****/
     } else if (msg.find("lower_water_pump_1_power_profile_off") !=
@@ -598,11 +619,16 @@ void request_handler::handle_client_msg(
         (*ctx_->user_request_set_power_mode)(
             common::channel_type::lower_water_pump_1,
             common::power_consumption_profile::medium);
-    } else if (msg.find("lower_water_pump_1_power_profile_hourly_60min") !=
+    } else if (msg.find("lower_water_pump_1_power_profile_hourly_45min") !=
                std::string::npos) {
         (*ctx_->user_request_set_power_mode)(
             common::channel_type::lower_water_pump_1,
             common::power_consumption_profile::high);
+    } else if (msg.find("lower_water_pump_1_power_profile_hourly_60min") !=
+               std::string::npos) {
+        (*ctx_->user_request_set_power_mode)(
+            common::channel_type::lower_water_pump_1,
+            common::power_consumption_profile::continuous);
 
         /***** Lower Water Pump #2 Power Profile *****/
     } else if (msg.find("lower_water_pump_2_power_profile_off") !=
@@ -625,11 +651,16 @@ void request_handler::handle_client_msg(
         (*ctx_->user_request_set_power_mode)(
             common::channel_type::lower_water_pump_2,
             common::power_consumption_profile::medium);
-    } else if (msg.find("lower_water_pump_2_power_profile_hourly_60min") !=
+    } else if (msg.find("lower_water_pump_2_power_profile_hourly_45min") !=
                std::string::npos) {
         (*ctx_->user_request_set_power_mode)(
             common::channel_type::lower_water_pump_2,
             common::power_consumption_profile::high);
+    } else if (msg.find("lower_water_pump_2_power_profile_hourly_60min") !=
+               std::string::npos) {
+        (*ctx_->user_request_set_power_mode)(
+            common::channel_type::lower_water_pump_2,
+            common::power_consumption_profile::continuous);
 
         /***** Lower Water Pump #3 Power Profile *****/
     } else if (msg.find("lower_water_pump_3_power_profile_off") !=
@@ -652,11 +683,16 @@ void request_handler::handle_client_msg(
         (*ctx_->user_request_set_power_mode)(
             common::channel_type::lower_water_pump_3,
             common::power_consumption_profile::medium);
-    } else if (msg.find("lower_water_pump_3_power_profile_hourly_60min") !=
+    } else if (msg.find("lower_water_pump_3_power_profile_hourly_45min") !=
                std::string::npos) {
         (*ctx_->user_request_set_power_mode)(
             common::channel_type::lower_water_pump_3,
             common::power_consumption_profile::high);
+    } else if (msg.find("lower_water_pump_3_power_profile_hourly_60min") !=
+               std::string::npos) {
+        (*ctx_->user_request_set_power_mode)(
+            common::channel_type::lower_water_pump_3,
+            common::power_consumption_profile::continuous);
     } else if (msg.find("development_cmd") != std::string::npos) {
         (*ctx_->user_request_development_cmd)(msg);
     } else if (msg.find("stats") != std::string::npos) {

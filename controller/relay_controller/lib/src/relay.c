@@ -129,6 +129,8 @@ static uint16_t rc_read_relay_state(rc_relay_port_t port)
 
     memcpy(&state, &i2cdata.block[1], sizeof(uint16_t));
 
+    close(fd);
+
     return state;
 }
 
@@ -156,6 +158,8 @@ static void rc_write_relay_state(rc_relay_port_t port, uint8_t cmd,
         fprintf(stderr, "error: writing I2C bus failed\n");
         return;
     }
+
+    close(fd);
 }
 
 //-------------------------------------------------------------------------------------------------------------------

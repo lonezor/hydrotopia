@@ -26,6 +26,8 @@ namespace common {
 std::string power_consumption_profile_str(power_consumption_profile profile)
 {
     switch (profile) {
+    case power_consumption_profile::continuous:
+        return "Continuous";
     case power_consumption_profile::high:
         return "High";
     case power_consumption_profile::medium:
