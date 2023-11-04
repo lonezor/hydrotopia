@@ -372,11 +372,12 @@ void request_handler::send_help_screen(
         << " - upper_full_spectrum_light_power_profile_daily_12h" << std::endl
         << " - upper_full_spectrum_light_power_profile_daily_18h" << std::endl
 
-        << " - lower_full_spectrum_light_power_profile_off" << std::endl
-        << " - lower_full_spectrum_light_power_profile_daily_03h" << std::endl
-        << " - lower_full_spectrum_light_power_profile_daily_06h" << std::endl
-        << " - lower_full_spectrum_light_power_profile_daily_12h" << std::endl
-        << " - lower_full_spectrum_light_power_profile_daily_18h" << std::endl
+        << " - wind_simulation_fan_power_profile_off" << std::endl
+        << " - wind_simulation_fan_power_profile_hourly_05min" << std::endl
+        << " - wind_simulation_fan_power_profile_hourly_15min" << std::endl
+        << " - wind_simulation_fan_power_profile_hourly_30min" << std::endl
+        << " - wind_simulation_fan_power_profile_hourly_45min" << std::endl
+        << " - wind_simulation_fan_power_profile_hourly_60min" << std::endl
 
         << " - upper_water_pump_1_power_profile_off" << std::endl
         << " - upper_water_pump_1_power_profile_hourly_05min" << std::endl
@@ -507,32 +508,37 @@ void request_handler::handle_client_msg(
             common::channel_type::upper_full_spectrum_light,
             common::power_consumption_profile::high);
 
-        /***** Lower Full Spectrum Light Power Profile *****/
-    } else if (msg.find("lower_full_spectrum_light_power_profile_off") !=
+        /***** Wind simulator fan Power Profile *****/
+    } else if (msg.find("wind_simulation_fan_power_profile_off") !=
                std::string::npos) {
         (*ctx_->user_request_set_power_mode)(
-            common::channel_type::lower_full_spectrum_light,
+            common::channel_type::wind_simulation_fan,
             common::power_consumption_profile::off);
-    } else if (msg.find("lower_full_spectrum_light_power_profile_daily_03h") !=
+    } else if (msg.find("wind_simulation_fan_power_profile_hourly_05min") !=
                std::string::npos) {
         (*ctx_->user_request_set_power_mode)(
-            common::channel_type::lower_full_spectrum_light,
+            common::channel_type::wind_simulation_fan,
             common::power_consumption_profile::emergency);
-    } else if (msg.find("lower_full_spectrum_light_power_profile_daily_06h") !=
+    } else if (msg.find("wind_simulation_fan_power_profile_hourly_15min") !=
                std::string::npos) {
         (*ctx_->user_request_set_power_mode)(
-            common::channel_type::lower_full_spectrum_light,
+            common::channel_type::wind_simulation_fan,
             common::power_consumption_profile::low);
-    } else if (msg.find("lower_full_spectrum_light_power_profile_daily_12h") !=
+    } else if (msg.find("wind_simulation_fan_power_profile_hourly_30min") !=
                std::string::npos) {
         (*ctx_->user_request_set_power_mode)(
-            common::channel_type::lower_full_spectrum_light,
+            common::channel_type::wind_simulation_fan,
             common::power_consumption_profile::medium);
-    } else if (msg.find("lower_full_spectrum_light_power_profile_daily_18h") !=
+    } else if (msg.find("wind_simulation_fan_power_profile_hourly_45min") !=
                std::string::npos) {
         (*ctx_->user_request_set_power_mode)(
-            common::channel_type::lower_full_spectrum_light,
+            common::channel_type::wind_simulation_fan,
             common::power_consumption_profile::high);
+    } else if (msg.find("wind_simulation_fan_power_profile_hourly_60min") !=
+               std::string::npos) {
+        (*ctx_->user_request_set_power_mode)(
+            common::channel_type::wind_simulation_fan,
+            common::power_consumption_profile::continuous);
 
         /***** Upper Water Pump #1 Power Profile *****/
     } else if (msg.find("upper_water_pump_1_power_profile_off") !=

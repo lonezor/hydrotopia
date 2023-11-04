@@ -98,12 +98,12 @@ controller::controller(std::shared_ptr<common::configuration> cfg)
     channel_collection_->upper_full_spectrum_light = ch_a2;
     channel_collection_->all_channels.emplace_back(ch_a2);
 
-    auto ch_a3 = std::make_shared<common::full_spectrum_light_channel>(
+    auto ch_a3 = std::make_shared<common::wind_simulation_fan_channel>(
         common::electrical_system::ac_220_240_volt,
-        common::channel_type::lower_full_spectrum_light, ctx_);
+        common::channel_type::wind_simulation_fan, ctx_);
     ch_a3->set_relay_module_idx(
-        common::relay_channel_idx_lower_full_spectrum_light_channel);
-    channel_collection_->lower_full_spectrum_light = ch_a3;
+        common::relay_channel_idx_wind_simulation_fan_channel);
+    channel_collection_->wind_simulation_fan = ch_a3;
     channel_collection_->all_channels.emplace_back(ch_a3);
 
     auto ch_a4 = std::make_shared<common::water_pump_channel>(
@@ -251,14 +251,14 @@ void controller::user_request_set_power_profile(
             channel_collection->upper_full_spectrum_light->activate();
         }
         break;
-    case common::channel_type::lower_full_spectrum_light:
-        channel_collection->lower_full_spectrum_light
-            ->set_power_consumption_profile(power_profile);
+    case common::channel_type::wind_simulation_fan:
+        channel_collection->wind_simulation_fan->set_power_consumption_profile(
+            power_profile);
 
         if (power_profile == common::power_consumption_profile::off) {
-            channel_collection->lower_full_spectrum_light->deactivate();
+            channel_collection->wind_simulation_fan->deactivate();
         } else {
-            channel_collection->lower_full_spectrum_light->activate();
+            channel_collection->wind_simulation_fan->activate();
         }
         break;
     case common::channel_type::lower_water_pump_1:

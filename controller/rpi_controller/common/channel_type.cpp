@@ -33,8 +33,8 @@ std::string channel_type_str(channel_type type)
         return "Ventilation Fan";
     case channel_type::upper_full_spectrum_light:
         return "Upper Full Spectrum Light";
-    case channel_type::lower_full_spectrum_light:
-        return "Lower Full Spectrum Light";
+    case channel_type::wind_simulation_fan:
+        return "Wind simulator fan";
     case channel_type::upper_water_pump_1:
         return "Upper Water Pump #1";
     case channel_type::upper_water_pump_2:

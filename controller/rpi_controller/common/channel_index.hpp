@@ -40,8 +40,8 @@ constexpr int relay_channel_idx_ventilation_fan_channel_high_rpm = 2;
 /** Relay channel index for upper full spectrum light */
 constexpr int relay_channel_idx_upper_full_spectrum_light_channel = 3;
 
-/** Relay channel index for lower full spectrum light */
-constexpr int relay_channel_idx_lower_full_spectrum_light_channel = 4;
+/** Relay channel index for wind simulation fan */
+constexpr int relay_channel_idx_wind_simulation_fan_channel = 4;
 
 /** Relay channel index for lower water pump #1 */
 constexpr int relay_channel_idx_lower_water_pump_1 = 5;

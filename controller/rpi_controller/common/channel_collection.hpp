@@ -27,6 +27,7 @@
 #include <common/channel/subsystem/main/step_down_voltage_transformer_channel.hpp>
 #include <common/channel/subsystem/main/ventilation_fan_channel.hpp>
 #include <common/channel/subsystem/main/water_pump_channel.hpp>
+#include <common/channel/subsystem/main/wind_simulation_fan_channel.hpp>
 
 namespace hydroctrl {
 namespace common {
@@ -36,10 +37,9 @@ namespace common {
 /** Channel collection */
 struct channel_collection
 {
-    /******************************************************************************************
-     ********************************** AC 220-240 VOLT
-     ****************************************
-     *****************************************************************************************/
+    /**************************************************
+     **************** AC 220-240 VOLT *****************
+     *************************************************/
 
     /** Rotary alarm light channel */
     std::shared_ptr<rotary_alarm_light_channel> rotary_alarm_light;
@@ -50,8 +50,8 @@ struct channel_collection
     /** Upper full spectrum light channel */
     std::shared_ptr<full_spectrum_light_channel> upper_full_spectrum_light;
 
-    /** Lower full spectrum light channel */
-    std::shared_ptr<full_spectrum_light_channel> lower_full_spectrum_light;
+    /** Wind simulation channel */
+    std::shared_ptr<wind_simulation_fan_channel> wind_simulation_fan;
 
     /** Lower water pump #1 */
     std::shared_ptr<water_pump_channel> lower_water_pump_1;
@@ -66,10 +66,9 @@ struct channel_collection
     std::shared_ptr<step_down_voltage_transformer_channel>
         step_down_voltage_transformer;
 
-    /******************************************************************************************
-     ********************************** AC 110-120 VOLT
-     ****************************************
-     *****************************************************************************************/
+    /**************************************************
+     **************** AC 110-120 VOLT *****************
+     *************************************************/
 
     /** Upper water pump #1 */
     std::shared_ptr<water_pump_channel> upper_water_pump_1;
@@ -77,10 +76,9 @@ struct channel_collection
     /** Upper water pump #2 */
     std::shared_ptr<water_pump_channel> upper_water_pump_2;
 
-    /******************************************************************************************
-     ************************************* COMMON
-     **********************************************
-     *****************************************************************************************/
+    /**************************************************
+     ********************* COMMON *********************
+     *************************************************/
 
     /** Iterator friendly vector */
     std::vector<std::shared_ptr<channel>> all_channels;
