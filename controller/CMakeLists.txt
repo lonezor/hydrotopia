@@ -1,2 +1,2 @@
-add_subdirectory(relay_controller)
-add_subdirectory(rpi_controller)
+add_subdirectory(relay)
+add_subdirectory(controller)
