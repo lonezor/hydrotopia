@@ -26,10 +26,18 @@ add_executable(hydroctrl
 )
 
 
-# Enable when running on real HW
+### Enable when running on real HW
 list(APPEND hydroctrl_flags
-#   HC_RELAY_MODULE_ENABLED
+   HC_RELAY_MODULE_ENABLED
+   HC_RELAY_MODULE_16_CHANNELS
+#   HC_RELAY_MODULE_32_CHANNELS
 )
+
+list(APPEND hydroctrl_libs
+  relay_controller::relay_16
+#  relay_controller::relay_32
+)
+
 
 target_compile_definitions(hydroctrl
     PRIVATE
@@ -38,7 +46,6 @@ target_compile_definitions(hydroctrl
 
 target_link_libraries(hydroctrl
     PRIVATE
-        rc_relay
         Threads::Threads
         ${hydroctrl_libs}
 )

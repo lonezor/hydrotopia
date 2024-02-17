@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <rc/relay.h>
+#include <rc/relay_32.h>
 
 #define PROGRAM_VERSION "relay_ctrl v0.6"
 

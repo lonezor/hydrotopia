@@ -22,14 +22,27 @@
 #include <cstddef>
 #include <vector>
 
-#include <rc/relay.h>
+#ifdef HC_RELAY_MODULE_16_CHANNELS
+#include <rc/relay_16.h>
+#endif // HC_RELAY_MODULE_16_CHANNELS
+
+#ifdef HC_RELAY_MODULE_32_CHANNELS
+#include <rc/relay_32.h>
+#endif // HC_RELAY_MODULE_32_CHANNELS
 
 namespace hydroctrl {
 namespace common {
 
 //---------------------------------------------------------------------------------------------------------------------
 
+#ifdef HC_RELAY_MODULE_16_CHANNELS
+constexpr int relay_module_size = 16;
+#endif // HC_RELAY_MODULE_16_CHANNELS
+
+#ifdef HC_RELAY_MODULE_32_CHANNELS
 constexpr int relay_module_size = 32;
+#endif // HC_RELAY_MODULE_32_CHANNELS
+
 
 //---------------------------------------------------------------------------------------------------------------------
 
@@ -56,7 +69,9 @@ class relay_module
     std::string stats();
 
   private:
+#ifdef HC_RELAY_MODULE_32_CHANNELS
     rc_relay_port_t index_to_relay_port(int index);
+#endif // HC_RELAY_MODULE_32_CHANNELS
 
     rc_relay_channel_t index_to_channel_type(int index);
 

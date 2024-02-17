@@ -179,7 +179,7 @@ hourly_ch_03_45m_->set_highlight_off(highlight_off);
 void settings_scene::draw()
 {
     if (!conn_established_) {
-        control_channel_.connect("127.0.0.1", 10);
+        control_channel_.connect("192.168.0.250", 10);
         retrieve_channel_state();
         conn_established_ = true;
     }

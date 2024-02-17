@@ -276,7 +276,8 @@ void keypad_scene::draw(ui_event ev)
     }
 
     if (evaluate) {
-      if (code_ == "809") {
+      // Touch screen child safety
+      if (code_ == "8090") {
         ended_ = true;
 
         for(auto&& object : objects_) {

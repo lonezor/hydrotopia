@@ -22,8 +22,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <rc/relay.h>
-
 #include <common/log.hpp>
 #include <common/relay_module/relay_module.hpp>
 
@@ -57,6 +55,7 @@ int relay_module::size() { return size_; }
 
 //---------------------------------------------------------------------------------------------------------------------
 
+#ifdef HC_RELAY_MODULE_32_CHANNELS
 rc_relay_port_t relay_module::index_to_relay_port(int index)
 {
     if (index < 0 || index > 31) {
@@ -70,6 +69,7 @@ rc_relay_port_t relay_module::index_to_relay_port(int index)
 
     return rc_relay_port_b;
 }
+#endif //HC_RELAY_MODULE_32_CHANNELS
 
 //---------------------------------------------------------------------------------------------------------------------
 
@@ -77,6 +77,63 @@ rc_relay_channel_t relay_module::index_to_channel_type(int index)
 {
     rc_relay_channel_t ch;
 
+#ifdef HC_RELAY_MODULE_16_CHANNELS
+    switch (index) {
+    case 0:
+        ch = rc_relay_channel_01;
+        break;
+    case 1:
+        ch = rc_relay_channel_02;
+        break;
+    case 2:
+        ch = rc_relay_channel_03;
+        break;
+    case 3:
+        ch = rc_relay_channel_04;
+        break;
+    case 4:
+        ch = rc_relay_channel_05;
+        break;
+    case 5:
+        ch = rc_relay_channel_06;
+        break;
+    case 6:
+        ch = rc_relay_channel_07;
+        break;
+    case 7:
+        ch = rc_relay_channel_08;
+        break;
+    case 8:
+        ch = rc_relay_channel_09;
+        break;
+    case 9:
+        ch = rc_relay_channel_10;
+        break;
+    case 10:
+        ch = rc_relay_channel_11;
+        break;
+    case 11:
+        ch = rc_relay_channel_12;
+        break;
+    case 12:
+        ch = rc_relay_channel_13;
+        break;
+    case 13:
+        ch = rc_relay_channel_14;
+        break;
+    case 14:
+        ch = rc_relay_channel_15;
+        break;
+   case 15:
+        ch = rc_relay_channel_16;
+        break;
+    default:
+        throw std::runtime_error("[relay_module::index_to_channel_type] failed "
+                                 "to map index to channel type");
+    }
+#endif // HC_RELAY_MODULE_16_CHANNELS
+
+#ifdef HC_RELAY_MODULE_32_CHANNELS
     switch (index) {
     case 0:
     case 16:
@@ -146,6 +203,7 @@ rc_relay_channel_t relay_module::index_to_channel_type(int index)
         throw std::runtime_error("[relay_module::index_to_channel_type] failed "
                                  "to map index to channel type");
     }
+#endif // HC_RELAY_MODULE_32_CHANNELS
 
     return ch;
 }
@@ -164,10 +222,20 @@ void relay_module::activate(int index)
     }
 
 #ifdef HC_RELAY_MODULE_ENABLED
+
     common::log(common::log_level::log_level_debug, "[relay_module::activate]");
+
+#ifdef HC_RELAY_MODULE_16_CHANNELS
+    auto ch = relay_module::index_to_channel_type(index);
+    rc_relay_channel_set(ch, true);
+#endif // HC_RELAY_MODULE_32_CHANNELS
+
+#ifdef HC_RELAY_MODULE_32_CHANNELS
     auto port = index_to_relay_port(index);
     auto ch = relay_module::index_to_channel_type(index);
     rc_relay_channel_set(port, ch, true);
+#endif // HC_RELAY_MODULE_32_CHANNELS
+
 #else  // HC_RELAY_MODULE_ENABLED
     std::stringstream msg;
     msg << "[relay_module::activate] idx " << index << " (stubbed)";
@@ -195,9 +263,18 @@ void relay_module::deactivate(int index)
 #ifdef HC_RELAY_MODULE_ENABLED
     common::log(common::log_level::log_level_debug,
                 "[relay_module::deactivate]");
+
+#ifdef HC_RELAY_MODULE_16_CHANNELS
+    auto ch = relay_module::index_to_channel_type(index);
+    rc_relay_channel_set(ch, false);
+#endif // HC_RELAY_MODULE_16_CHANNELS
+
+#ifdef HC_RELAY_MODULE_32_CHANNELS
     auto port = index_to_relay_port(index);
     auto ch = relay_module::index_to_channel_type(index);
     rc_relay_channel_set(port, ch, false);
+#endif // HC_RELAY_MODULE_32_CHANNELS
+
 #else  // HC_RELAY_MODULE_ENABLED
     common::log(common::log_level::log_level_notice,
                 "[relay_module::deactivate] stubbed");
@@ -218,6 +295,26 @@ void relay_module::clear()
 #ifdef HC_RELAY_MODULE_ENABLED
     common::log(common::log_level::log_level_debug, "[relay_module::clear]");
 
+#ifdef HC_RELAY_MODULE_16_CHANNELS
+    rc_relay_channel_set(rc_relay_channel_01, false);
+    rc_relay_channel_set(rc_relay_channel_02, false);
+    rc_relay_channel_set(rc_relay_channel_03, false);
+    rc_relay_channel_set(rc_relay_channel_04, false);
+    rc_relay_channel_set(rc_relay_channel_05, false);
+    rc_relay_channel_set(rc_relay_channel_06, false);
+    rc_relay_channel_set(rc_relay_channel_07, false);
+    rc_relay_channel_set(rc_relay_channel_08, false);
+    rc_relay_channel_set(rc_relay_channel_09, false);
+    rc_relay_channel_set(rc_relay_channel_10, false);
+    rc_relay_channel_set(rc_relay_channel_11, false);
+    rc_relay_channel_set(rc_relay_channel_12, false);
+    rc_relay_channel_set(rc_relay_channel_13, false);
+    rc_relay_channel_set(rc_relay_channel_14, false);
+    rc_relay_channel_set(rc_relay_channel_15, false);
+    rc_relay_channel_set(rc_relay_channel_16, false);
+#endif // HC_RELAY_MODULE_16_CHANNELS
+
+#ifdef HC_RELAY_MODULE_32_CHANNELS
     rc_relay_channel_set(rc_relay_port_a, rc_relay_channel_01, false);
     rc_relay_channel_set(rc_relay_port_a, rc_relay_channel_02, false);
     rc_relay_channel_set(rc_relay_port_a, rc_relay_channel_03, false);
@@ -251,6 +348,8 @@ void relay_module::clear()
     rc_relay_channel_set(rc_relay_port_b, rc_relay_channel_14, false);
     rc_relay_channel_set(rc_relay_port_b, rc_relay_channel_15, false);
     rc_relay_channel_set(rc_relay_port_b, rc_relay_channel_16, false);
+#endif // HC_RELAY_MODULE_32_CHANNELS
+
 #else  // HC_RELAY_MODULE_ENABLED
     common::log(common::log_level::log_level_notice,
                 "[relay_module::clear] stubbed");
