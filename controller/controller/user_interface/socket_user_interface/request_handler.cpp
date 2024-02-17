@@ -204,9 +204,11 @@ void request_handler::handle_client_socket_event(
     // Switch to ASCII
     std::string msg(span_buff.data(), span_buff.data() + recv_len);
 
-    msg.erase(std::remove(msg.begin(), msg.end(), '\n'), msg.end());
-
-    handle_client_msg(sock, msg);
+    std::stringstream ss(msg);
+    std::string line;
+    while (std::getline(ss, line, '\n')) {
+        handle_client_msg(sock, line);
+    }
 }
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -444,8 +446,7 @@ void request_handler::handle_client_msg(
     const std::shared_ptr<common::socket> &sock, const std::string &msg)
 {
     std::stringstream log_msg;
-    log_msg << "[request_handler::handle_client_msg] msg '" << msg << "'"
-            << msg;
+    log_msg << "[request_handler::handle_client_msg] msg '" << msg << "'";
     common::log(common::log_level::log_level_debug, log_msg.str());
 
     /***** Ventilation RPM *****/

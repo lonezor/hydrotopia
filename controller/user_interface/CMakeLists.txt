@@ -30,6 +30,7 @@ add_executable(hydrotopia_ui
     src/scene/01_idle_screen/idle_scene.cpp
     src/scene/02_security/keypad_scene.cpp
     src/scene/03_settings/settings_scene.cpp
+    src/scene/03_settings/control_channel.cpp
     src/scene/scene.cpp
     src/timer.cpp
     src/user_interface/button.cpp

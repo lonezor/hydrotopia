@@ -174,13 +174,16 @@ hourly_ch_03_45m_->set_highlight_off(highlight_off);
  lock_ = std::shared_ptr<navigate_object>(new navigate_object(ctx_,
     sur_cache_, 1085, 568, 320, 160, navigation_state::setting_lock));
  lock_->set_highlight_off(highlight_off);
-
- retrieve_channel_state();
-
 }
 
 void settings_scene::draw()
 {
+    if (!conn_established_) {
+        control_channel_.connect("127.0.0.1", 10);
+        retrieve_channel_state();
+        conn_established_ = true;
+    }
+
     for(auto&& object : objects_) {
         object->draw();
     }
@@ -226,6 +229,7 @@ void settings_scene::draw()
     auto elapsed_time = (get_ts() - started_ts_) / 1000; // unit: ms
 
     if (started_ts_ != 0 && elapsed_time > timeout.count()) {
+      control_channel_.disconnect();
       exit(0);
     }
 
@@ -234,100 +238,90 @@ void settings_scene::draw()
         object->invalidate();
       }
     }
-
 }
 
 void settings_scene::retrieve_channel_state()
 {
     // The remote side response is tailored for this user interface
 
-    std::string response;
-    response += "daily_ch_01_12h\n";
-    response += "daily_ch_02_18h\n";
-    response += "hourly_ch_01_30m\n";
-    response += "hourly_ch_03_15m\n";
+    auto response = control_channel_.query_channel_states();
 
     std::stringstream ss(response);
     std::string line;
     while (std::getline(ss, line, '\n')) {
-        if (line.find("daily_ch_01_off") != std::string::npos) {
+        if (line.find("daily_ch_01_off: 1") != std::string::npos) {
             daily_ch_01_off_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("daily_ch_01_3h") != std::string::npos) {
+        if (line.find("daily_ch_01_3h: 1") != std::string::npos) {
             daily_ch_01_3h_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("daily_ch_01_6h") != std::string::npos) {
+        if (line.find("daily_ch_01_6h: 1") != std::string::npos) {
             daily_ch_01_6h_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("daily_ch_01_12h") != std::string::npos) {
+        if (line.find("daily_ch_01_12h: 1") != std::string::npos) {
             daily_ch_01_12h_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("daily_ch_01_18h") != std::string::npos) {
+        if (line.find("daily_ch_01_18h: 1") != std::string::npos) {
             daily_ch_01_18h_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("daily_ch_02_off") != std::string::npos) {
+        if (line.find("daily_ch_02_off: 1") != std::string::npos) {
             daily_ch_02_off_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("daily_ch_02_3h") != std::string::npos) {
+        if (line.find("daily_ch_02_3h: 1") != std::string::npos) {
             daily_ch_02_3h_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("daily_ch_02_6h") != std::string::npos) {
+        if (line.find("daily_ch_02_6h: 1") != std::string::npos) {
             daily_ch_02_6h_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("daily_ch_02_12h") != std::string::npos) {
+        if (line.find("daily_ch_02_12h: 1") != std::string::npos) {
             daily_ch_02_12h_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("daily_ch_02_18h") != std::string::npos) {
+        if (line.find("daily_ch_02_18h: 1") != std::string::npos) {
             daily_ch_02_18h_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("hourly_ch_01_off") != std::string::npos) {
+        if (line.find("hourly_ch_01_off: 1") != std::string::npos) {
             hourly_ch_01_off_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("hourly_ch_01_5m") != std::string::npos) {
+        if (line.find("hourly_ch_01_5m: 1") != std::string::npos) {
             hourly_ch_01_5m_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("hourly_ch_01_15m") != std::string::npos) {
+        if (line.find("hourly_ch_01_15m: 1") != std::string::npos) {
             hourly_ch_01_15m_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("hourly_ch_01_30m") != std::string::npos) {
+        if (line.find("hourly_ch_01_30m: 1") != std::string::npos) {
             hourly_ch_01_30m_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("hourly_ch_01_45m") != std::string::npos) {
+        if (line.find("hourly_ch_01_45m: 1") != std::string::npos) {
             hourly_ch_01_45m_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("hourly_ch_02_5m") != std::string::npos) {
+        if (line.find("hourly_ch_02_5m: 1") != std::string::npos) {
             hourly_ch_02_5m_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("hourly_ch_02_15m") != std::string::npos) {
+        if (line.find("hourly_ch_02_15m: 1") != std::string::npos) {
             hourly_ch_02_15m_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("hourly_ch_02_30m") != std::string::npos) {
+        if (line.find("hourly_ch_02_30m: 1") != std::string::npos) {
             hourly_ch_02_30m_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("hourly_ch_02_45m") != std::string::npos) {
+        if (line.find("hourly_ch_02_45m: 1") != std::string::npos) {
             hourly_ch_02_45m_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("hourly_ch_03_off") != std::string::npos) {
+        if (line.find("hourly_ch_03_off: 1") != std::string::npos) {
             hourly_ch_03_off_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("hourly_ch_03_5m") != std::string::npos) {
+        if (line.find("hourly_ch_03_5m: 1") != std::string::npos) {
             hourly_ch_03_5m_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("hourly_ch_03_15m") != std::string::npos) {
+        if (line.find("hourly_ch_03_15m: 1") != std::string::npos) {
             hourly_ch_03_15m_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("hourly_ch_03_30m") != std::string::npos) {
+        if (line.find("hourly_ch_03_30m: 1") != std::string::npos) {
             hourly_ch_03_30m_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
-        if (line.find("hourly_ch_03_45m") != std::string::npos) {
+        if (line.find("hourly_ch_03_45m: 1") != std::string::npos) {
             hourly_ch_03_45m_->update_ev_state(ui_event(ui_event_type::button_press), true);
         }
     }
-}
-
-void settings_scene::run_command(std::string cmd)
-{
-    std::cout << "command " << cmd << std::endl;
 }
 
 void settings_scene::begin()
@@ -337,6 +331,12 @@ void settings_scene::begin()
 
 void settings_scene::draw(ui_event ev)
 {
+    if (!conn_established_) {
+        control_channel_.connect("127.0.0.1", 10);
+        retrieve_channel_state();
+        conn_established_ = true;
+    }
+
     // User interactions resets screen timer
     started_ts_ = get_ts();
 
@@ -364,7 +364,7 @@ void settings_scene::draw(ui_event ev)
     }
 
     if (daily_ch_01_off_->is_selected()) {
-        run_command("upper_full_spectrum_light_power_profile_off");
+        control_channel_.send_cmd("upper_full_spectrum_light_power_profile_off");
     }
   }
   else if (daily_ch_01_3h_->update_ev_state(ev, false)) {
@@ -381,7 +381,7 @@ void settings_scene::draw(ui_event ev)
         daily_ch_01_18h_->unselect();
     }
     if (daily_ch_01_3h_->is_selected()) {
-        run_command("upper_full_spectrum_light_power_profile_daily_03h");
+        control_channel_.send_cmd("upper_full_spectrum_light_power_profile_daily_03h");
     }
   }
   else if (daily_ch_01_6h_->update_ev_state(ev, false)) {
@@ -398,7 +398,7 @@ void settings_scene::draw(ui_event ev)
         daily_ch_01_18h_->unselect();
     }
     if (daily_ch_01_6h_->is_selected()) {
-        run_command("upper_full_spectrum_light_power_profile_daily_06h");
+        control_channel_.send_cmd("upper_full_spectrum_light_power_profile_daily_06h");
     }
   }
   else if (daily_ch_01_12h_->update_ev_state(ev, false)) {
@@ -415,7 +415,7 @@ void settings_scene::draw(ui_event ev)
         daily_ch_01_18h_->unselect();
     }
     if (daily_ch_01_12h_->is_selected()) {
-        run_command("upper_full_spectrum_light_power_profile_daily_12h");
+        control_channel_.send_cmd("upper_full_spectrum_light_power_profile_daily_12h");
     }
   }
   else if (daily_ch_01_18h_->update_ev_state(ev, false)) {
@@ -432,7 +432,7 @@ void settings_scene::draw(ui_event ev)
         daily_ch_01_12h_->unselect();
     }
     if (daily_ch_01_18h_->is_selected()) {
-        run_command("upper_full_spectrum_light_power_profile_daily_18h");
+        control_channel_.send_cmd("upper_full_spectrum_light_power_profile_daily_18h");
     }
   }
 
@@ -451,7 +451,7 @@ void settings_scene::draw(ui_event ev)
         daily_ch_02_18h_->unselect();
     }
     if (daily_ch_02_off_->is_selected()) {
-        run_command("lower_full_spectrum_light_power_profile_off");
+        control_channel_.send_cmd("lower_full_spectrum_light_power_profile_off");
     }
   }
    else if (daily_ch_02_3h_->update_ev_state(ev, false)) {
@@ -468,7 +468,7 @@ void settings_scene::draw(ui_event ev)
         daily_ch_02_18h_->unselect();
     }
     if (daily_ch_02_3h_->is_selected()) {
-        run_command("lower_full_spectrum_light_power_profile_daily_03h");
+        control_channel_.send_cmd("lower_full_spectrum_light_power_profile_daily_03h");
     }
   }
   else if (daily_ch_02_6h_->update_ev_state(ev, false)) {
@@ -485,7 +485,7 @@ void settings_scene::draw(ui_event ev)
         daily_ch_02_18h_->unselect();
     }
     if (daily_ch_02_6h_->is_selected()) {
-        run_command("lower_full_spectrum_light_power_profile_daily_06h");
+        control_channel_.send_cmd("lower_full_spectrum_light_power_profile_daily_06h");
     }
   }
   else if (daily_ch_02_12h_->update_ev_state(ev, false)) {
@@ -502,7 +502,7 @@ void settings_scene::draw(ui_event ev)
         daily_ch_02_18h_->unselect();
     }
     if (daily_ch_02_12h_->is_selected()) {
-        run_command("lower_full_spectrum_light_power_profile_daily_12h");
+        control_channel_.send_cmd("lower_full_spectrum_light_power_profile_daily_12h");
     }
   }
   else if (daily_ch_02_18h_->update_ev_state(ev, false)) {
@@ -519,7 +519,7 @@ void settings_scene::draw(ui_event ev)
         daily_ch_02_12h_->unselect();
     }
     if (daily_ch_02_18h_->is_selected()) {
-        run_command("lower_full_spectrum_light_power_profile_daily_18h");
+        control_channel_.send_cmd("lower_full_spectrum_light_power_profile_daily_18h");
     }
   }
 
@@ -550,7 +550,7 @@ void settings_scene::draw(ui_event ev)
         hourly_ch_02_45m_->unselect();
     }
     if (hourly_ch_01_off_->is_selected()) {
-        run_command("ventilation_fan_power_profile_off");
+        control_channel_.send_cmd("ventilation_fan_power_profile_off");
     }
   }
   else if (hourly_ch_01_5m_->update_ev_state(ev, false)) {
@@ -579,8 +579,8 @@ void settings_scene::draw(ui_event ev)
         hourly_ch_02_45m_->unselect();
     }
     if (hourly_ch_01_5m_->is_selected()) {
-        run_command("ventilation_fan_rpm_high");
-        run_command("ventilation_fan_power_profile_hourly_05min");
+        control_channel_.send_cmd("ventilation_fan_rpm_high");
+        control_channel_.send_cmd("ventilation_fan_power_profile_hourly_05min");
     }
   }
   
@@ -610,8 +610,8 @@ void settings_scene::draw(ui_event ev)
         hourly_ch_02_45m_->unselect();
     }
     if (hourly_ch_01_15m_->is_selected()) {
-        run_command("ventilation_fan_rpm_high");
-        run_command("ventilation_fan_power_profile_hourly_15min");
+        control_channel_.send_cmd("ventilation_fan_rpm_high");
+        control_channel_.send_cmd("ventilation_fan_power_profile_hourly_15min");
     }
   }
   
@@ -641,8 +641,8 @@ void settings_scene::draw(ui_event ev)
         hourly_ch_02_45m_->unselect();
     }
     if (hourly_ch_01_30m_->is_selected()) {
-        run_command("ventilation_fan_rpm_high");
-        run_command("ventilation_fan_power_profile_hourly_30min");
+        control_channel_.send_cmd("ventilation_fan_rpm_high");
+        control_channel_.send_cmd("ventilation_fan_power_profile_hourly_30min");
     }
   }
   
@@ -672,8 +672,8 @@ void settings_scene::draw(ui_event ev)
         hourly_ch_02_45m_->unselect();
     }
     if (hourly_ch_01_45m_) {
-        run_command("ventilation_fan_rpm_high");
-        run_command("ventilation_fan_power_profile_hourly_45min");
+        control_channel_.send_cmd("ventilation_fan_rpm_high");
+        control_channel_.send_cmd("ventilation_fan_power_profile_hourly_45min");
     }
   }
 
@@ -706,8 +706,8 @@ void settings_scene::draw(ui_event ev)
     }
 
     if (hourly_ch_02_5m_->is_selected()) {
-        run_command("ventilation_fan_rpm_low");
-        run_command("ventilation_fan_power_profile_hourly_05min");
+        control_channel_.send_cmd("ventilation_fan_rpm_low");
+        control_channel_.send_cmd("ventilation_fan_power_profile_hourly_05min");
     }
   }
   
@@ -738,8 +738,8 @@ void settings_scene::draw(ui_event ev)
     }
 
     if (hourly_ch_02_15m_->is_selected()) {
-        run_command("ventilation_fan_rpm_low");
-        run_command("ventilation_fan_power_profile_hourly_15min");
+        control_channel_.send_cmd("ventilation_fan_rpm_low");
+        control_channel_.send_cmd("ventilation_fan_power_profile_hourly_15min");
     }
   }
   
@@ -769,8 +769,8 @@ void settings_scene::draw(ui_event ev)
         hourly_ch_01_45m_->unselect();
     }
     if (hourly_ch_02_30m_->is_selected()) {
-        run_command("ventilation_fan_rpm_low");
-        run_command("ventilation_fan_power_profile_hourly_30min");
+        control_channel_.send_cmd("ventilation_fan_rpm_low");
+        control_channel_.send_cmd("ventilation_fan_power_profile_hourly_30min");
     }
   }
   
@@ -801,8 +801,8 @@ void settings_scene::draw(ui_event ev)
     }
     
     if (hourly_ch_02_45m_->is_selected()) {
-        run_command("ventilation_fan_rpm_low");
-        run_command("ventilation_fan_power_profile_hourly_45min");
+        control_channel_.send_cmd("ventilation_fan_rpm_low");
+        control_channel_.send_cmd("ventilation_fan_power_profile_hourly_45min");
     }
   }
 
@@ -821,7 +821,7 @@ void settings_scene::draw(ui_event ev)
         hourly_ch_03_45m_->unselect();
     }
     if (hourly_ch_03_off_->is_selected()) {
-        run_command("wind_simulation_fan_power_profile_off");
+        control_channel_.send_cmd("wind_simulation_fan_power_profile_off");
     }
   }
   else if (hourly_ch_03_5m_->update_ev_state(ev, false)) {
@@ -838,7 +838,7 @@ void settings_scene::draw(ui_event ev)
         hourly_ch_03_45m_->unselect();
     }
     if (hourly_ch_03_5m_->is_selected()) {
-        run_command("wind_simulation_fan_power_profile_hourly_05min");
+        control_channel_.send_cmd("wind_simulation_fan_power_profile_hourly_05min");
     }
   }
   
@@ -856,7 +856,7 @@ void settings_scene::draw(ui_event ev)
         hourly_ch_03_45m_->unselect();
     }
     if (hourly_ch_03_15m_->is_selected()) {
-        run_command("wind_simulation_fan_power_profile_hourly_15min");
+        control_channel_.send_cmd("wind_simulation_fan_power_profile_hourly_15min");
     }
   }
   
@@ -874,7 +874,7 @@ void settings_scene::draw(ui_event ev)
         hourly_ch_03_45m_->unselect();
     }
     if (hourly_ch_03_30m_->is_selected()) {
-        run_command("wind_simulation_fan_power_profile_hourly_30min");
+        control_channel_.send_cmd("wind_simulation_fan_power_profile_hourly_30min");
     }
   }
   
@@ -892,7 +892,7 @@ void settings_scene::draw(ui_event ev)
         hourly_ch_03_30m_->unselect();
     }
     if (hourly_ch_03_45m_->is_selected()) {
-        run_command("wind_simulation_fan_power_profile_hourly_45min");
+        control_channel_.send_cmd("wind_simulation_fan_power_profile_hourly_45min");
     }
   }
 

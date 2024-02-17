@@ -30,6 +30,7 @@
 #include <object/object.hpp>
 #include <object/text_object.hpp>
 #include <scene/scene.hpp>
+#include <scene/03_settings/control_channel.hpp>
 
 class settings_scene : public scene
 {
@@ -42,7 +43,6 @@ class settings_scene : public scene
 
     private:
         void retrieve_channel_state();
-        void run_command(std::string cmd);
 
         int64_t started_ts_{0};
 
@@ -80,6 +80,10 @@ class settings_scene : public scene
         std::shared_ptr<navigate_object> hourly_ch_03_60m_;
 
         std::shared_ptr<navigate_object> lock_;
+
+        control_channel control_channel_;
+
+        bool conn_established_{false};
 
 };
 

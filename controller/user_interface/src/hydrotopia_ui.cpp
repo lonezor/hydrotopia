@@ -232,7 +232,7 @@ void hydrotopia_ui::draw_on_screen_display()
     ctx_->fill();
 
     ctx_->set_source_rgb(0, 0, 0);
-    ctx_->move_to(1975,1585);
+    ctx_->move_to(1920,1585);
     ctx_->font_size(75);
     ctx_->show_text(oss.str());
 }

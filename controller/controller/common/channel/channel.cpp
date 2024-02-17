@@ -157,7 +157,7 @@ std::chrono::milliseconds channel::determine_activation_duration(
     }
 
     std::stringstream ss_msg;
-    ss_msg << "[water_pump_channel::determine_activation_duration] duration "
+    ss_msg << "[channel::determine_activation_duration] duration "
            << duration.count();
     common::log(common::log_level::log_level_debug, ss_msg.str());
 
