@@ -54,7 +54,11 @@ void idle_scene::draw(ui_event ev)
         object->draw();
     }
 
-  if (ev.get_x() > 0 && ev.get_y() > 0) {
-    ended_ = true;
-  }
+    if (ev.get_x() > 0 && ev.get_y() > 0) {
+        ended_ = true;
+    }
+
+    if (ev.get_button_state() == button::left) {
+        ended_ = true;
+    }
 }
