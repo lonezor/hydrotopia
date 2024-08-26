@@ -28,11 +28,11 @@ namespace common {
 
 // Relay idx 0-4 maps to physical IEC connector panel 0-4
 
-/** Relay channel index for ventilation fan: low rpm */
-constexpr int relay_channel_idx_ventilation_fan_channel_low_rpm = 0;
-
 /** Relay channel index for ventilation fan: high rpm */
-constexpr int relay_channel_idx_ventilation_fan_channel_high_rpm = 1;
+constexpr int relay_channel_idx_ventilation_fan_channel_high_rpm = 0;
+
+/** Relay channel index for drip irrigation */
+constexpr int relay_channel_idx_drip_irrigation_channel = 1;
 
 /** Relay channel index for upper full spectrum light */
 constexpr int relay_channel_idx_upper_full_spectrum_light_channel = 2;

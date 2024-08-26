@@ -27,12 +27,14 @@ namespace common {
 std::string channel_type_str(channel_type type)
 {
     switch (type) {
-    case channel_type::ventilation_fan:
-        return "Ventilation Fan";
     case channel_type::upper_full_spectrum_light:
         return "Upper Full Spectrum Light";
     case channel_type::lower_full_spectrum_light:
         return "Lower Full Spectrum Light";
+    case channel_type::drip_irrigation:
+        return "Drip Irrigation";
+    case channel_type::ventilation_fan:
+        return "Ventilation Fan";
     case channel_type::wind_simulation_fan:
         return "Wind simulator fan";
     case channel_type::unknown:

@@ -19,6 +19,14 @@
 
 #include <scene/03_settings/control_channel.hpp>
 
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <stdio.h>
+#include <time.h>
+#include <chrono>
+#include <sstream>
+
 void 
 control_channel::connect(std::string host, int port)
 {
@@ -74,6 +82,8 @@ void control_channel::send_cmd(std::string cmd)
     snprintf(buffer_.data(), buffer_.size(), "%s\n", cmd.c_str());
 
     auto res = send(fd_, buffer_.data(), cmd.size()+1, 0);
+
+    std::cout << "send_cmd res " << res << std::endl;
 }
 
 std::string control_channel::query_channel_states()
@@ -84,12 +94,12 @@ std::string control_channel::query_channel_states()
 
     // Do not try forever
     for(int i=0; i < 16; i++) {
+        std::cout << i << std::endl;
 
         buffer_.resize(1024 * 1024);
         memset(buffer_.data(), 0, buffer_.size());
 
         auto res = recv(fd_, buffer_.data(), buffer_.size() , 0);
-        std::cout << "res " << res << std::endl;
 
         if (res <= 0) {
             send_cmd("channel_states");
@@ -100,13 +110,26 @@ std::string control_channel::query_channel_states()
             response += buffer_[idx];
         }
 
-        if (response.find("state_hourly_ch_03_45m: ") != std::string::npos) {
+        if (response.find("state_hourly_ch_02_45m: ") != std::string::npos) {
             break;
         }
 
     }
 
     return response;
+}
+
+void control_channel::update_remote_clock()
+{
+    auto now = std::chrono::system_clock::now();
+    auto time_t_fmt = std::chrono::system_clock::to_time_t(now);
+ 
+    std::stringstream ss;
+    ss << "date --set=\"";
+    ss << std::put_time(std::localtime(&time_t_fmt), "%a %b %d %H:%M:%S %Y");
+    ss << "\"";
+
+    send_cmd(ss.str());
 }
 
 void control_channel::disconnect()

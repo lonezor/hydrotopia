@@ -58,6 +58,12 @@ class settings_scene : public scene
         std::shared_ptr<navigate_object> daily_ch_02_12h_;
         std::shared_ptr<navigate_object> daily_ch_02_18h_;
 
+        std::shared_ptr<navigate_object> daily_ch_03_off_;
+        std::shared_ptr<navigate_object> daily_ch_03_3h_;
+        std::shared_ptr<navigate_object> daily_ch_03_6h_;
+        std::shared_ptr<navigate_object> daily_ch_03_12h_;
+        std::shared_ptr<navigate_object> daily_ch_03_18h_;
+
         std::shared_ptr<navigate_object> hourly_ch_01_off_;
         std::shared_ptr<navigate_object> hourly_ch_01_5m_;
         std::shared_ptr<navigate_object> hourly_ch_01_15m_;
@@ -71,13 +77,6 @@ class settings_scene : public scene
         std::shared_ptr<navigate_object> hourly_ch_02_30m_;
         std::shared_ptr<navigate_object> hourly_ch_02_45m_;
         std::shared_ptr<navigate_object> hourly_ch_02_60m_;
-
-        std::shared_ptr<navigate_object> hourly_ch_03_off_;
-        std::shared_ptr<navigate_object> hourly_ch_03_5m_;
-        std::shared_ptr<navigate_object> hourly_ch_03_15m_;
-        std::shared_ptr<navigate_object> hourly_ch_03_30m_;
-        std::shared_ptr<navigate_object> hourly_ch_03_45m_;
-        std::shared_ptr<navigate_object> hourly_ch_03_60m_;
 
         std::shared_ptr<navigate_object> lock_;
 

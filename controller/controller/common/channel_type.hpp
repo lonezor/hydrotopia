@@ -30,14 +30,17 @@ enum class channel_type
 {
     unknown,
 
-    /** Ventilation fan */
-    ventilation_fan,
-
     /** Upper full spectrum light */
     upper_full_spectrum_light,
 
     /** Lower full spectrum light */
     lower_full_spectrum_light,
+
+    /** Drip irrigation */
+    drip_irrigation,
+
+    /** Ventilation fan */
+    ventilation_fan,
 
     /** Wind simulator fan */
     wind_simulation_fan,

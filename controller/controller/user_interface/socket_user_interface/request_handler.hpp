@@ -158,22 +158,23 @@ class request_handler
     bool state_daily_ch_02_12h_{false};
     bool state_daily_ch_02_18h_{false};
 
+    bool state_daily_ch_03_off_{true};
+    bool state_daily_ch_03_3h_{false};
+    bool state_daily_ch_03_6h_{false};
+    bool state_daily_ch_03_12h_{false};
+    bool state_daily_ch_03_18h_{false};
+
     bool state_hourly_ch_01_off_{true};
     bool state_hourly_ch_01_5m_{false};
     bool state_hourly_ch_01_15m_{false};
     bool state_hourly_ch_01_30m_{false};
     bool state_hourly_ch_01_45m_{false};
 
+    bool state_hourly_ch_02_off_{true};
     bool state_hourly_ch_02_5m_{false};
     bool state_hourly_ch_02_15m_{false};
     bool state_hourly_ch_02_30m_{false};
     bool state_hourly_ch_02_45m_{false};
-
-    bool state_hourly_ch_03_off_{true};
-    bool state_hourly_ch_03_5m_{false};
-    bool state_hourly_ch_03_15m_{false};
-    bool state_hourly_ch_03_30m_{false};
-    bool state_hourly_ch_03_45m_{false};
 };
 
 //---------------------------------------------------------------------------------------------------------------------

@@ -345,25 +345,30 @@ void request_handler::send_channel_states(const std::shared_ptr<common::socket> 
     stats << "state_daily_ch_01_6h: " << state_daily_ch_01_6h_ << std::endl;
     stats << "state_daily_ch_01_12h: " << state_daily_ch_01_12h_ << std::endl;
     stats << "state_daily_ch_01_18h: " << state_daily_ch_01_18h_ << std::endl;
+    
     stats << "state_daily_ch_02_off: " << state_daily_ch_02_off_ << std::endl;
     stats << "state_daily_ch_02_3h: " << state_daily_ch_02_3h_ << std::endl;
     stats << "state_daily_ch_02_6h: " << state_daily_ch_02_6h_ << std::endl;
     stats << "state_daily_ch_02_12h: " << state_daily_ch_02_12h_ << std::endl;
     stats << "state_daily_ch_02_18h: " << state_daily_ch_02_18h_ << std::endl;
+
+    stats << "state_daily_ch_03_off: " << state_daily_ch_03_off_ << std::endl;
+    stats << "state_daily_ch_03_3h: " << state_daily_ch_03_3h_ << std::endl;
+    stats << "state_daily_ch_03_6h: " << state_daily_ch_03_6h_ << std::endl;
+    stats << "state_daily_ch_03_12h: " << state_daily_ch_03_12h_ << std::endl;
+    stats << "state_daily_ch_03_18h: " << state_daily_ch_03_18h_ << std::endl;
+
     stats << "state_hourly_ch_01_off: " << state_hourly_ch_01_off_ << std::endl;
     stats << "state_hourly_ch_01_5m: " << state_hourly_ch_01_5m_ << std::endl;
     stats << "state_hourly_ch_01_15m: " << state_hourly_ch_01_15m_ << std::endl;
     stats << "state_hourly_ch_01_30m: " << state_hourly_ch_01_30m_ << std::endl;
     stats << "state_hourly_ch_01_45m: " << state_hourly_ch_01_45m_ << std::endl;
+
+    stats << "state_hourly_ch_02_off: " << state_hourly_ch_02_off_ << std::endl;
     stats << "state_hourly_ch_02_5m: " << state_hourly_ch_02_5m_ << std::endl;
     stats << "state_hourly_ch_02_15m: " << state_hourly_ch_02_15m_ << std::endl;
     stats << "state_hourly_ch_02_30m: " << state_hourly_ch_02_30m_ << std::endl;
     stats << "state_hourly_ch_02_45m: " << state_hourly_ch_02_45m_ << std::endl;
-    stats << "state_hourly_ch_03_off: " << state_hourly_ch_03_off_ << std::endl;
-    stats << "state_hourly_ch_03_5m: " << state_hourly_ch_03_5m_ << std::endl;
-    stats << "state_hourly_ch_03_15m: " << state_hourly_ch_03_15m_ << std::endl;
-    stats << "state_hourly_ch_03_30m: " << state_hourly_ch_03_30m_ << std::endl;
-    stats << "state_hourly_ch_03_45m: " << state_hourly_ch_03_45m_ << std::endl;
 
     auto tx_buffer = stats.str();
 
@@ -422,6 +427,12 @@ void request_handler::send_help_screen(
         << " - lower_full_spectrum_light_power_profile_daily_12h" << std::endl
         << " - lower_full_spectrum_light_power_profile_daily_18h" << std::endl
 
+        << " - drip_irrigation_power_profile_off" << std::endl
+        << " - drip_irrigation_power_profile_daily_03h" << std::endl
+        << " - drip_irrigation_power_profile_daily_06h" << std::endl
+        << " - drip_irrigation_power_profile_daily_12h" << std::endl
+        << " - drip_irrigation_power_profile_daily_18h" << std::endl
+
         << " - wind_simulation_fan_power_profile_off" << std::endl
         << " - wind_simulation_fan_power_profile_hourly_05min" << std::endl
         << " - wind_simulation_fan_power_profile_hourly_15min" << std::endl
@@ -449,6 +460,18 @@ void request_handler::handle_client_msg(
     log_msg << "[request_handler::handle_client_msg] msg '" << msg << "'";
     common::log(common::log_level::log_level_debug, log_msg.str());
 
+    /** Since this device may not have an RTC or any way to run
+     * NTP, set the time explicitly. The date command is steered to
+     * the system command line as is. This is an air gapped system
+     * so it is considered safe. Physical access needed.
+     */
+
+    if (msg.find("date --set") != std::string::npos) {
+        std::string date_cmd = msg;
+        common::log(common::log_level::log_level_debug, "Run system cmd '" + date_cmd + "'");
+        system(date_cmd.c_str());
+    }
+
     /***** Ventilation RPM *****/
     if (msg.find("ventilation_fan_rpm_low") != std::string::npos) {
         (*ctx_->user_request_set_ventilation_fan_mode)(
@@ -475,10 +498,6 @@ void request_handler::handle_client_msg(
             state_hourly_ch_01_15m_ = false;
             state_hourly_ch_01_30m_ = false;
             state_hourly_ch_01_45m_ = false;
-            state_hourly_ch_02_5m_ = false;
-            state_hourly_ch_02_15m_ = false;
-            state_hourly_ch_02_30m_ = false;
-            state_hourly_ch_02_45m_ = false;
     } else if (msg.find("ventilation_fan_power_profile_hourly_05min") !=
                std::string::npos) {
         (*ctx_->user_request_set_power_mode)(
@@ -491,20 +510,12 @@ void request_handler::handle_client_msg(
                 state_hourly_ch_01_15m_ = false;
                 state_hourly_ch_01_30m_ = false;
                 state_hourly_ch_01_45m_ = false;
-                state_hourly_ch_02_5m_ = false;
-                state_hourly_ch_02_15m_ = false;
-                state_hourly_ch_02_30m_ = false;
-                state_hourly_ch_02_45m_ = false;
             } else {
                 state_hourly_ch_01_off_ = false;
                 state_hourly_ch_01_5m_ = false;
                 state_hourly_ch_01_15m_ = false;
                 state_hourly_ch_01_30m_ = false;
                 state_hourly_ch_01_45m_ = false;
-                state_hourly_ch_02_5m_ =  true;
-                state_hourly_ch_02_15m_ = false;
-                state_hourly_ch_02_30m_ = false;
-                state_hourly_ch_02_45m_ = false;
             }
     } else if (msg.find("ventilation_fan_power_profile_hourly_15min") !=
                std::string::npos) {
@@ -518,20 +529,12 @@ void request_handler::handle_client_msg(
                 state_hourly_ch_01_15m_ = true;
                 state_hourly_ch_01_30m_ = false;
                 state_hourly_ch_01_45m_ = false;
-                state_hourly_ch_02_5m_ = false;
-                state_hourly_ch_02_15m_ = false;
-                state_hourly_ch_02_30m_ = false;
-                state_hourly_ch_02_45m_ = false;
             } else {
                 state_hourly_ch_01_off_ = false;
                 state_hourly_ch_01_5m_ = false;
                 state_hourly_ch_01_15m_ = false;
                 state_hourly_ch_01_30m_ = false;
                 state_hourly_ch_01_45m_ = false;
-                state_hourly_ch_02_5m_ =  false;
-                state_hourly_ch_02_15m_ = true;
-                state_hourly_ch_02_30m_ = false;
-                state_hourly_ch_02_45m_ = false;
             }
     } else if (msg.find("ventilation_fan_power_profile_hourly_30min") !=
                std::string::npos) {
@@ -544,20 +547,12 @@ void request_handler::handle_client_msg(
                 state_hourly_ch_01_15m_ = false;
                 state_hourly_ch_01_30m_ = true;
                 state_hourly_ch_01_45m_ = false;
-                state_hourly_ch_02_5m_ = false;
-                state_hourly_ch_02_15m_ = false;
-                state_hourly_ch_02_30m_ = false;
-                state_hourly_ch_02_45m_ = false;
             } else {
                 state_hourly_ch_01_off_ = false;
                 state_hourly_ch_01_5m_ = false;
                 state_hourly_ch_01_15m_ = false;
                 state_hourly_ch_01_30m_ = false;
                 state_hourly_ch_01_45m_ = false;
-                state_hourly_ch_02_5m_ =  false;
-                state_hourly_ch_02_15m_ = false;
-                state_hourly_ch_02_30m_ = true;
-                state_hourly_ch_02_45m_ = false;
             }
     } else if (msg.find("ventilation_fan_power_profile_hourly_45min") !=
                std::string::npos) {
@@ -570,20 +565,12 @@ void request_handler::handle_client_msg(
                 state_hourly_ch_01_15m_ = false;
                 state_hourly_ch_01_30m_ = false;
                 state_hourly_ch_01_45m_ = true;
-                state_hourly_ch_02_5m_ = false;
-                state_hourly_ch_02_15m_ = false;
-                state_hourly_ch_02_30m_ = false;
-                state_hourly_ch_02_45m_ = false;
             } else {
                 state_hourly_ch_01_off_ = false;
                 state_hourly_ch_01_5m_ = false;
                 state_hourly_ch_01_15m_ = false;
                 state_hourly_ch_01_30m_ = false;
                 state_hourly_ch_01_45m_ = false;
-                state_hourly_ch_02_5m_ =  false;
-                state_hourly_ch_02_15m_ = false;
-                state_hourly_ch_02_30m_ = false;
-                state_hourly_ch_02_45m_ = true;
             }
     } else if (msg.find("ventilation_fan_power_profile_hourly_60min") !=
                std::string::npos) {
@@ -695,57 +682,109 @@ void request_handler::handle_client_msg(
             state_daily_ch_02_12h_ = false;
             state_daily_ch_02_18h_ = true;
 
+        /***** Drip Irrigation Power Profile *****/
+    } else if (msg.find("drip_irrigation_power_profile_off") !=
+               std::string::npos) {
+        (*ctx_->user_request_set_power_mode)(
+            common::channel_type::drip_irrigation,
+            common::power_consumption_profile::off);
+            state_daily_ch_03_off_ = true;
+            state_daily_ch_03_3h_ = false;
+            state_daily_ch_03_6h_ = false;
+            state_daily_ch_03_12h_ = false;
+            state_daily_ch_03_18h_ = false;
+    } else if (msg.find("drip_irrigation_power_profile_daily_03h") !=
+               std::string::npos) {
+        (*ctx_->user_request_set_power_mode)(
+            common::channel_type::drip_irrigation,
+            common::power_consumption_profile::emergency);
+            state_daily_ch_03_off_ = false;
+            state_daily_ch_03_3h_ = true;
+            state_daily_ch_03_6h_ = false;
+            state_daily_ch_03_12h_ = false;
+            state_daily_ch_03_18h_ = false;
+    } else if (msg.find("drip_irrigation_power_profile_daily_06h") !=
+               std::string::npos) {
+        (*ctx_->user_request_set_power_mode)(
+            common::channel_type::drip_irrigation,
+            common::power_consumption_profile::low);
+            state_daily_ch_03_off_ = false;
+            state_daily_ch_03_3h_ = false;
+            state_daily_ch_03_6h_ = true;
+            state_daily_ch_03_12h_ = false;
+            state_daily_ch_03_18h_ = false;
+    } else if (msg.find("drip_irrigation_power_profile_daily_12h") !=
+               std::string::npos) {
+        (*ctx_->user_request_set_power_mode)(
+            common::channel_type::drip_irrigation,
+            common::power_consumption_profile::medium);
+            state_daily_ch_03_off_ = false;
+            state_daily_ch_03_3h_ = false;
+            state_daily_ch_03_6h_ = false;
+            state_daily_ch_03_12h_ = true;
+            state_daily_ch_03_18h_ = false;
+    } else if (msg.find("drip_irrigation_power_profile_daily_18h") !=
+               std::string::npos) {
+        (*ctx_->user_request_set_power_mode)(
+            common::channel_type::drip_irrigation,
+            common::power_consumption_profile::high);
+            state_daily_ch_03_off_ = false;
+            state_daily_ch_03_3h_ = false;
+            state_daily_ch_03_6h_ = false;
+            state_daily_ch_03_12h_ = false;
+            state_daily_ch_03_18h_ = true;
+
         /***** Wind simulator fan Power Profile *****/
     } else if (msg.find("wind_simulation_fan_power_profile_off") !=
                std::string::npos) {
         (*ctx_->user_request_set_power_mode)(
             common::channel_type::wind_simulation_fan,
             common::power_consumption_profile::off);
-            state_hourly_ch_03_off_ = true;
-            state_hourly_ch_03_5m_ = false;
-            state_hourly_ch_03_15m_ = false;
-            state_hourly_ch_03_30m_ = false;
-            state_hourly_ch_03_45m_ = false;
+            state_hourly_ch_02_off_ = true;
+            state_hourly_ch_02_5m_ = false;
+            state_hourly_ch_02_15m_ = false;
+            state_hourly_ch_02_30m_ = false;
+            state_hourly_ch_02_45m_ = false;
     } else if (msg.find("wind_simulation_fan_power_profile_hourly_05min") !=
                std::string::npos) {
         (*ctx_->user_request_set_power_mode)(
             common::channel_type::wind_simulation_fan,
             common::power_consumption_profile::emergency);
-            state_hourly_ch_03_off_ = false;
-            state_hourly_ch_03_5m_ = true;
-            state_hourly_ch_03_15m_ = false;
-            state_hourly_ch_03_30m_ = false;
-            state_hourly_ch_03_45m_ = false;
+            state_hourly_ch_02_off_ = false;
+            state_hourly_ch_02_5m_ = true;
+            state_hourly_ch_02_15m_ = false;
+            state_hourly_ch_02_30m_ = false;
+            state_hourly_ch_02_45m_ = false;
     } else if (msg.find("wind_simulation_fan_power_profile_hourly_15min") !=
                std::string::npos) {
         (*ctx_->user_request_set_power_mode)(
             common::channel_type::wind_simulation_fan,
             common::power_consumption_profile::low);
-            state_hourly_ch_03_off_ = false;
-            state_hourly_ch_03_5m_ = false;
-            state_hourly_ch_03_15m_ = true;
-            state_hourly_ch_03_30m_ = false;
-            state_hourly_ch_03_45m_ = false;
+            state_hourly_ch_02_off_ = false;
+            state_hourly_ch_02_5m_ = false;
+            state_hourly_ch_02_15m_ = true;
+            state_hourly_ch_02_30m_ = false;
+            state_hourly_ch_02_45m_ = false;
     } else if (msg.find("wind_simulation_fan_power_profile_hourly_30min") !=
                std::string::npos) {
         (*ctx_->user_request_set_power_mode)(
             common::channel_type::wind_simulation_fan,
             common::power_consumption_profile::medium);
-            state_hourly_ch_03_off_ = false;
-            state_hourly_ch_03_5m_ = false;
-            state_hourly_ch_03_15m_ = false;
-            state_hourly_ch_03_30m_ = true;
-            state_hourly_ch_03_45m_ = false;
+            state_hourly_ch_02_off_ = false;
+            state_hourly_ch_02_5m_ = false;
+            state_hourly_ch_02_15m_ = false;
+            state_hourly_ch_02_30m_ = true;
+            state_hourly_ch_02_45m_ = false;
     } else if (msg.find("wind_simulation_fan_power_profile_hourly_45min") !=
                std::string::npos) {
         (*ctx_->user_request_set_power_mode)(
             common::channel_type::wind_simulation_fan,
             common::power_consumption_profile::high);
-            state_hourly_ch_03_off_ = false;
-            state_hourly_ch_03_5m_ = false;
-            state_hourly_ch_03_15m_ = false;
-            state_hourly_ch_03_30m_ = false;
-            state_hourly_ch_03_45m_ = true;
+            state_hourly_ch_02_off_ = false;
+            state_hourly_ch_02_5m_ = false;
+            state_hourly_ch_02_15m_ = false;
+            state_hourly_ch_02_30m_ = false;
+            state_hourly_ch_02_45m_ = true;
     } else if (msg.find("wind_simulation_fan_power_profile_hourly_60min") !=
                std::string::npos) {
         (*ctx_->user_request_set_power_mode)(

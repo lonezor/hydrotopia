@@ -6,6 +6,7 @@ add_executable(hydroctrl
     common/channel/subsystem/main/full_spectrum_light_channel.cpp
     common/channel/subsystem/main/ventilation_fan_channel.cpp
     common/channel/subsystem/main/wind_simulation_fan_channel.cpp
+    common/channel/subsystem/main/drip_irrigation_channel.cpp
     common/error_code.cpp
     common/event.cpp
     common/io_monitor.cpp

@@ -42,6 +42,8 @@ class control_channel {
         void send_cmd(std::string cmd);
 
         std::string query_channel_states();
+        
+        void update_remote_clock();
 
         void disconnect();
 

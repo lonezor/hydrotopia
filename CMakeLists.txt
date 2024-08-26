@@ -7,5 +7,4 @@ include(GNUInstallDirs)
 # This project needs C++20 std::chrono support
 SET(CMAKE_CXX_STANDARD 20)
 
-add_subdirectory(cabinet)
 add_subdirectory(controller)

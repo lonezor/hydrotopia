@@ -209,7 +209,7 @@ std::string hydrotopia_ui::elapsed_time_str(int64_t elapsed_time) {
 void hydrotopia_ui::clear_on_screen_display()
 {
     ctx_->set_source_rgb(1, 1, 1);
-    ctx_->rectangle(900, 1520, 750, 100);
+    ctx_->rectangle(1405, 1520, 750, 100);
     ctx_->fill();
 }
 
@@ -228,11 +228,11 @@ void hydrotopia_ui::draw_on_screen_display()
     oss << ts;
 
     ctx_->set_source_rgb(1, 1, 1);
-    ctx_->rectangle(900, 1520, 750, 100);
+    ctx_->rectangle(1405, 1520, 750, 100);
     ctx_->fill();
 
     ctx_->set_source_rgb(0, 0, 0);
-    ctx_->move_to(950, 1585);
+    ctx_->move_to(1450, 1585);
     ctx_->font_size(75);
     ctx_->show_text(oss.str());
 }

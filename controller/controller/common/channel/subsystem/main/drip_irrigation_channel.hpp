@@ -16,42 +16,54 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>
  */
 
-#pragma once
-
-#include <memory>
-#include <vector>
+#include <chrono>
 
 #include <common/channel/channel.hpp>
-#include <common/channel/subsystem/main/full_spectrum_light_channel.hpp>
-#include <common/channel/subsystem/main/ventilation_fan_channel.hpp>
-#include <common/channel/subsystem/main/wind_simulation_fan_channel.hpp>
-#include <common/channel/subsystem/main/drip_irrigation_channel.hpp>
 
 namespace hydroctrl {
 namespace common {
 
 //---------------------------------------------------------------------------------------------------------------------
 
-/** Channel collection */
-struct channel_collection
+class drip_irrigation_channel : public channel
 {
-    /** Upper full spectrum light channel */
-    std::shared_ptr<full_spectrum_light_channel> upper_full_spectrum_light;
+  public:
+    /** Constructor */
+    drip_irrigation_channel(common::channel_type channel_type,
+                            std::shared_ptr<common::controller_ctx> ctx);
 
-    /** Lower full spectrum light channel */
-    std::shared_ptr<full_spectrum_light_channel> lower_full_spectrum_light;
+    /** @brief Hourly tick
+     *
+     * The hourly tick is used to regulate activation:
+     *  - Activation at certain hour of the day (06:00)
+     *
+     * The hourly tick is used to regulate deactivation:
+     *  - Deactivation after power profile duration has been reached
+     */
+    void hourly_tick() final;
 
-    /** Drip irrigation channel */
-    std::shared_ptr<drip_irrigation_channel> drip_irrigation;
+    /** @brief Activate channel
+     *
+     * Immediate channel activation.
+     */
+    void activate() final;
 
-    /** Ventilation fan channel */
-    std::shared_ptr<ventilation_fan_channel> ventilation_fan;
+    /** @brief Deactivate channel
+     *
+     * Immediate channel deactivation
+     */
+    void deactivate() final;
 
-    /** Wind simulation channel */
-    std::shared_ptr<wind_simulation_fan_channel> wind_simulation_fan;
+  private:
+    /** Calculate duration of daily power profile */
+    std::chrono::hours
+    duration_of_daily_power_profile(common::power_consumption_profile profile);
 
-    /** Iterator friendly vector */
-    std::vector<std::shared_ptr<channel>> all_channels;
+    /** Hours activated */
+    std::chrono::hours hours_activated_{std::chrono::hours(0)};
+
+    /** Activated */
+    bool activated_{false};
 };
 
 //---------------------------------------------------------------------------------------------------------------------

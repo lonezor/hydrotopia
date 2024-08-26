@@ -65,9 +65,10 @@ controller::controller(std::shared_ptr<common::configuration> cfg)
     channel_collection_ = std::make_shared<common::channel_collection>();
 
     auto ch_a0 = std::make_shared<common::ventilation_fan_channel>(ctx_);
+    // At the moment, rpm modes are disabled; vector has two identical entries
     std::vector<int> relay_indexes;
     relay_indexes.emplace_back(
-        common::relay_channel_idx_ventilation_fan_channel_low_rpm);
+        common::relay_channel_idx_ventilation_fan_channel_high_rpm);
     relay_indexes.emplace_back(
         common::relay_channel_idx_ventilation_fan_channel_high_rpm);
     ch_a0->set_relay_module_idx(relay_indexes);
@@ -94,6 +95,13 @@ controller::controller(std::shared_ptr<common::configuration> cfg)
         common::relay_channel_idx_wind_simulation_fan_channel);
     channel_collection_->wind_simulation_fan = ch_a3;
     channel_collection_->all_channels.emplace_back(ch_a3);
+
+    auto ch_a4 = std::make_shared<common::drip_irrigation_channel>(
+        common::channel_type::drip_irrigation, ctx_);
+    ch_a4->set_relay_module_idx(
+        common::relay_channel_idx_drip_irrigation_channel);
+    channel_collection_->drip_irrigation = ch_a4;
+    channel_collection_->all_channels.emplace_back(ch_a4);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -180,6 +188,16 @@ void controller::user_request_set_power_profile(
             channel_collection->wind_simulation_fan->deactivate();
         } else {
             channel_collection->wind_simulation_fan->activate();
+        }
+        break;
+    case common::channel_type::drip_irrigation:
+        channel_collection->drip_irrigation->set_power_consumption_profile(
+            power_profile);
+
+        if (power_profile == common::power_consumption_profile::off) {
+            channel_collection->drip_irrigation->deactivate();
+        } else {
+            channel_collection->drip_irrigation->activate();
         }
         break;
     default:
