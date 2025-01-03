@@ -23,5 +23,9 @@ controller/relay_controller/tool/cmake_install.cmake
 controller/relay_controller/tool/rc_ctrl
 controller/rpi_controller/cmake_install.cmake
 controller/rpi_controller/hydroctrl
+controller/localhost_event/hydro_localhost_event
 install_manifest.txt
 controller/controller/hydroctrl
+controller/sensor_service/hydro_data_processor
+controller/sensor_service/hydro_sensor_service
+controller/sensor_service/server

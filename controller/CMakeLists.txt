@@ -1,3 +1,5 @@
 add_subdirectory(relay)
 add_subdirectory(controller)
 add_subdirectory(user_interface)
+add_subdirectory(sensor_service)
+add_subdirectory(localhost_event)
