@@ -270,9 +270,6 @@ void ventilation_fan_channel::deactivate()
         throw std::runtime_error(
             "[ventilation_fan_channel::deactivate] critical error");
     }
-
-    // Sleep 2 seconds to ensure power is off
-    std::this_thread::sleep_for(std::chrono::seconds(3));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
