@@ -6,6 +6,7 @@
 #include <vector>
 #include <regex>
 #include <iostream>
+#include <cmath>
 #include <limits>
 
 #include <assert.h>
@@ -54,6 +55,10 @@ std::string extract_sensor_value(const std::string& sensor_readings, const std::
 
 void data_processor::add_measurement(measurement_type type, const std::string& value)
 {
+    if (value.empty()) {
+        return;
+    }
+
     auto e = measurement();
     e.ts = std::chrono::system_clock::now();
     e.value = value;
@@ -63,23 +68,95 @@ void data_processor::add_measurement(measurement_type type, const std::string& v
 void data_processor::data_ingestion(const std::string& sensor_readings)
 {
     if (sensor_readings.find("ambient_temperature") != std::string::npos) {
-        auto value = extract_sensor_value(sensor_readings, "ambient_temperature (.+),");
-        add_measurement(measurement_type::sensor_ambient_temperature,value);
+        auto raw = extract_sensor_value(sensor_readings, "ambient_temperature (.+),");
+
+        double target = atof(raw.c_str());
+
+        static bool initial_sample = true;
+        static double dvalue = 0;
+
+        if (initial_sample) {
+            double v = target;
+            v *= 0.99;
+            dvalue = v;
+            initial_sample = false;
+        }
+
+        dvalue = std::lerp(dvalue, target, 0.5f);
+        std::stringstream svalue;
+        svalue.precision(8);
+        svalue << std::fixed << dvalue;
+
+        add_measurement(measurement_type::sensor_ambient_temperature,svalue.str());
     }
     
     if (sensor_readings.find("ambient_humidity") != std::string::npos) {
-        auto value = extract_sensor_value(sensor_readings, "ambient_humidity (.+)$");
-        add_measurement(measurement_type::sensor_ambient_humidity,value);
+        auto raw = extract_sensor_value(sensor_readings, "ambient_humidity (.+)$");
+
+        double target = atof(raw.c_str());
+
+        static bool initial_sample = true;
+        static double dvalue = 0;
+
+        if (initial_sample) {
+            double v = target;
+            v *= 0.99;
+            dvalue = v;
+            initial_sample = false;
+        }
+
+        dvalue = std::lerp(dvalue, target, 0.5f);
+        std::stringstream svalue;
+        svalue.precision(8);
+        svalue << std::fixed << dvalue;
+
+        add_measurement(measurement_type::sensor_ambient_humidity,svalue.str());
     }
     
     if (sensor_readings.find("water_temperature") != std::string::npos) {
-        auto value = extract_sensor_value(sensor_readings, "water_temperature (.+), ");
-        add_measurement(measurement_type::sensor_water_temperature,value);
+        auto raw = extract_sensor_value(sensor_readings, "water_temperature (.+), ");
+
+        double target = atof(raw.c_str());
+
+        static bool initial_sample = true;
+        static double dvalue = 0;
+
+        if (initial_sample) {
+            double v = target;
+            v *= 0.99;
+            dvalue = v;
+            initial_sample = false;
+        }
+
+        dvalue = std::lerp(dvalue, target, 0.5f);
+        std::stringstream svalue;
+        svalue.precision(8);
+        svalue << std::fixed << dvalue;
+
+        add_measurement(measurement_type::sensor_water_temperature,svalue.str());
     }
     
     if (sensor_readings.find("water_tds_ec") != std::string::npos) {
-        auto value = extract_sensor_value(sensor_readings, "water_tds_ec '.*,(.+)'");
-        add_measurement(measurement_type::sensor_water_ec,value);
+        auto raw = extract_sensor_value(sensor_readings, "water_tds_ec '.*,(.+)'");
+
+        double target = atof(raw.c_str());
+
+        static bool initial_sample = true;
+        static double dvalue = 0;
+
+        if (initial_sample) {
+            double v = target;
+            v *= 0.99;
+            dvalue = v;
+            initial_sample = false;
+        }
+
+        dvalue = std::lerp(dvalue, target, 0.2f);
+        std::stringstream svalue;
+        svalue.precision(8);
+        svalue << std::fixed << dvalue;
+
+        add_measurement(measurement_type::sensor_water_ec,svalue.str());
     }
 
     if (sensor_readings.find("localhost_event") != std::string::npos) {

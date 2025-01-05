@@ -147,11 +147,11 @@ void gnuplot::generate_temperature_config_file(const std::string& file_name,
         << "set autoscale x" << std::endl
         << "set autoscale y" << std::endl
         << "set xtics rotate by -270" << std::endl
-        << "set style line 1 lc rgb '#95c85e' lt 1 lw 2 pt 7 pi -1 ps 0.6" << std::endl
-        << "set style line 2 lc rgb '#97bada' lt 1 lw 2 pt 7 pi -1 ps 0.6" << std::endl
-        << "set style line 3 lc rgb '#86591a' lt 1 lw 2 pt 7 pi -1 ps 0.6" << std::endl
-        << "set style line 4 lc rgb '#000000' lt 1 lw 2 pt 7 pi -1 ps 0.6" << std::endl
-        << "set style line 5 lc rgb '#000f00' lt 1 lw 2 pt 7 pi -1 ps 0.6" << std::endl
+        << "set style line 1 lc rgb '#95c85e' lt 1 lw 2 pt 7 pi -1 ps 1.1" << std::endl
+        << "set style line 2 lc rgb '#97bada' lt 1 lw 2 pt 7 pi -1 ps 1.1" << std::endl
+        << "set style line 3 lc rgb '#86591a' lt 1 lw 2 pt 7 pi -1 ps 1.1" << std::endl
+        << "set style line 4 lc rgb '#000000' lt 1 lw 2 pt 7 pi -1 ps 1.1" << std::endl
+        << "set style line 5 lc rgb '#000f00' lt 1 lw 2 pt 7 pi -1 ps 1.1" << std::endl
         << "set style line 6 lc rgb '#a25d07' lt 1 lw 1 pt 8 pi -1 ps 2" << std::endl
         << "set style line 7 lc rgb '#a25d07' lt 1 lw 1 pt 10 pi -1 ps 2" << std::endl
         << "set style line 8 lc rgb '#a25d07' lt 1 lw 1 pt 17 pi -1 ps 2" << std::endl
@@ -194,11 +194,11 @@ void gnuplot::generate_humidity_config_file(const std::string& file_name,
         << "set autoscale x" << std::endl
         << "set autoscale y" << std::endl
         << "set xtics rotate by -270" << std::endl
-        << "set style line 1 lc rgb '#95c85e' lt 1 lw 2 pt 7 pi -1 ps 0.6" << std::endl
-        << "set style line 2 lc rgb '#97bada' lt 1 lw 2 pt 7 pi -1 ps 0.6" << std::endl
-        << "set style line 3 lc rgb '#86591a' lt 1 lw 2 pt 7 pi -1 ps 0.6" << std::endl
-        << "set style line 4 lc rgb '#000000' lt 1 lw 2 pt 7 pi -1 ps 0.6" << std::endl
-        << "set style line 5 lc rgb '#000f00' lt 1 lw 2 pt 7 pi -1 ps 0.6" << std::endl
+        << "set style line 1 lc rgb '#95c85e' lt 1 lw 2 pt 7 pi -1 ps 1.1" << std::endl
+        << "set style line 2 lc rgb '#97bada' lt 1 lw 2 pt 7 pi -1 ps 1.1" << std::endl
+        << "set style line 3 lc rgb '#86591a' lt 1 lw 2 pt 7 pi -1 ps 1.1" << std::endl
+        << "set style line 4 lc rgb '#000000' lt 1 lw 2 pt 7 pi -1 ps 1.1" << std::endl
+        << "set style line 5 lc rgb '#000f00' lt 1 lw 2 pt 7 pi -1 ps 1.1" << std::endl
         << "set style line 6 lc rgb '#a25d07' lt 1 lw 1 pt 8 pi -1 ps 2" << std::endl
         << "set style line 7 lc rgb '#a25d07' lt 1 lw 1 pt 10 pi -1 ps 2" << std::endl
         << "set style line 8 lc rgb '#a25d07' lt 1 lw 1 pt 17 pi -1 ps 2" << std::endl
@@ -240,11 +240,11 @@ void gnuplot::generate_water_ec_config_file(const std::string& file_name,
         << "set autoscale x" << std::endl
         << "set autoscale y" << std::endl
         << "set xtics rotate by -270" << std::endl
-        << "set style line 1 lc rgb '#95c85e' lt 1 lw 2 pt 7 pi -1 ps 0.6" << std::endl
-        << "set style line 2 lc rgb '#97bada' lt 1 lw 2 pt 7 pi -1 ps 0.6" << std::endl
-        << "set style line 3 lc rgb '#86591a' lt 1 lw 2 pt 7 pi -1 ps 0.6" << std::endl
-        << "set style line 4 lc rgb '#000000' lt 1 lw 2 pt 7 pi -1 ps 0.6" << std::endl
-        << "set style line 5 lc rgb '#000f00' lt 1 lw 2 pt 7 pi -1 ps 0.6" << std::endl
+        << "set style line 1 lc rgb '#95c85e' lt 1 lw 2 pt 7 pi -1 ps 1.1" << std::endl
+        << "set style line 2 lc rgb '#97bada' lt 1 lw 2 pt 7 pi -1 ps 1.1" << std::endl
+        << "set style line 3 lc rgb '#86591a' lt 1 lw 2 pt 7 pi -1 ps 1.1" << std::endl
+        << "set style line 4 lc rgb '#000000' lt 1 lw 2 pt 7 pi -1 ps 1.1" << std::endl
+        << "set style line 5 lc rgb '#000f00' lt 1 lw 2 pt 7 pi -1 ps 1.1" << std::endl
         << "set style line 6 lc rgb '#a25d07' lt 1 lw 1 pt 8 pi -1 ps 2" << std::endl
         << "set style line 7 lc rgb '#a25d07' lt 1 lw 1 pt 10 pi -1 ps 2" << std::endl
         << "set style line 8 lc rgb '#a25d07' lt 1 lw 1 pt 17 pi -1 ps 2" << std::endl
