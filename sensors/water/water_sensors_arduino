@@ -1,0 +1,125 @@
+#include "SoftWire.h"
+#include "SHT31_SW.h"
+#include <Ethernet.h>
+#include <EthernetUdp.h>
+#include <Adafruit_INA260.h>
+
+#define SHT31_ADDRESS 0x44
+
+byte mac[] = {
+  0xab, 0xba, 0xbe, 0xef, 0x01, 0x02
+};
+
+IPAddress ip_local(192, 168, 201, 250);
+IPAddress ip_remote(192, 168, 201, 1);
+
+EthernetUDP Udp;
+
+void setup() {
+  Serial.begin(9600);
+  Serial2.begin(9600);
+
+  Ethernet.begin(mac, ip_local);
+
+ if (Ethernet.hardwareStatus() == EthernetNoHardware) {
+    Serial.println("Ethernet shield was not found");
+    while (true) {
+      delay(1);
+    }
+  }
+  if (Ethernet.linkStatus() == LinkOFF) {
+    Serial.println("Ethernet cable is not connected.");
+  }
+
+  // start UDP
+  Udp.begin(201);
+}
+
+float double_map(double x, double in_min, double in_max, double out_min, double out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+void read_tds_ec_sensor(char water_temperature[20])
+{
+  Adafruit_INA260 ina260 = Adafruit_INA260();
+  ina260.begin((uint8_t)0x41);
+
+  double voltage = ina260.readBusVoltage();
+  voltage /= (double)1000;
+  
+  double water_temp = (voltage - 1.058) / 0.009;
+
+  dtostrf(water_temp, 5, 5, water_temperature);
+
+  ina260.reset();
+}
+
+void read_ambient_sensor(char ambient_temp[20], char ambient_humidity[20])
+{
+  SoftWire sw(20, 21);  //  sda, scl
+  SHT31_SW sht(SHT31_ADDRESS, &sw);
+
+  sht.begin();
+  sht.read();
+
+  dtostrf(sht.getTemperature(), 5, 5, ambient_temp);
+  dtostrf(sht.getHumidity(), 5, 5, ambient_humidity);
+
+  sht.reset();
+}
+
+
+void loop() {
+
+  char water_temperature[20];
+
+  memset(water_temperature, 0, sizeof(water_temperature));
+
+  read_tds_ec_sensor(water_temperature);
+
+  Serial2.print("R");
+  Serial2.print("\r");
+
+#define RESPONSE_LEN (100)
+  char water_tds_ec[RESPONSE_LEN];
+  memset(water_tds_ec, 0, sizeof(water_tds_ec)); 
+
+  int idx = 0;
+
+  delay(200);
+
+  while(Serial2.available()) {
+    char c = Serial2.read();
+
+
+    if (idx < RESPONSE_LEN) {
+      water_tds_ec[idx++] = c;
+    }
+  }
+  for(int k=0;k<RESPONSE_LEN;k++) {
+    if (water_tds_ec[k] == '*') {
+      water_tds_ec[k] = 0;
+      break;
+    }
+  }
+
+  char sensor_readings[1024];
+  memset(sensor_readings, 0, sizeof(sensor_readings));
+
+  int len = snprintf(sensor_readings, sizeof(sensor_readings), 
+  "water_temperature %s, water_tds_ec '%s'",
+           water_temperature,
+           water_tds_ec);
+
+  Serial.println(sensor_readings);
+
+  Udp.beginPacket(ip_remote, 201);
+  Udp.write(sensor_readings, len);
+  Udp.endPacket();
+
+// too low value causes serial noise
+  delay(2000);
+}
+
+
+//  -- END OF FILE --
