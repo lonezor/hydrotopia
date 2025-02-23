@@ -16,6 +16,7 @@ enum class measurement_type {
     event_water_circulation,
     event_o2_electrolysis,
 };
+constexpr size_t measurement_event_index_start = 4;
 
 struct measurement {
     /** Timestamp */

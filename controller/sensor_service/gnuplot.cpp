@@ -12,8 +12,10 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <unordered_map>
 #include <cmath>
 #include <vector>
+#include <random>
 
 
 gnuplot::gnuplot(std::string working_dir)
@@ -266,6 +268,11 @@ void gnuplot::generate_water_ec_config_file(const std::string& file_name,
                          cfg);
 }
 
+bool compare_samples(const measurement &a, const measurement &b)
+{
+    return a.ts.time_since_epoch().count() < b.ts.time_since_epoch().count();
+}
+
 void gnuplot::generate_data_file(const std::vector<measurement>& data, const std::string& file_name)
 {
     std::stringstream path;
@@ -273,7 +280,61 @@ void gnuplot::generate_data_file(const std::vector<measurement>& data, const std
 
     std::ofstream out(path.str());
 
-    for(auto&& e : data) {
+    // There are a lot of data samples available. Plotting them all does not look great
+    // in the chart. It needs to be kept below a threshold
+    const uint64_t threshold = 250;
+    
+    std::vector<measurement> samples;
+    if (data.size() <= threshold) {
+        samples = data;
+    } else {
+        #define EVEN_STEP_SIZE (1)
+
+        auto last_idx = static_cast<uint64_t>(data.size()-1);
+#ifdef RANDOM_SELECTION
+        // Randomly pick samples. It will evenly thin out the population
+        // without loosing the overall picture
+        samples.clear();
+
+        std::unordered_map<uint64_t,bool> history;
+        
+        while(samples.size() < threshold) {
+            std::random_device device;
+            std::default_random_engine engine(device());
+            std::uniform_int_distribution<uint64_t> uniform_dist(0, last_idx);
+            auto idx = uniform_dist(engine);
+
+            // Found new index
+            if (history.find(idx) == history.end()) {
+                samples.emplace_back(data[idx]);
+                
+                // Mark it as used
+                history[idx] = true;
+            }
+        }
+
+        // Sort the entries cronologically
+        std::sort(samples.begin(), samples.end(), compare_samples);
+#endif // RANDOM_SELECTION
+
+#ifdef EVEN_STEP_SIZE
+        // Select samples with even distance over time. This makes the graphs
+        // less jumpy when not enough data is available. Even spacing also makes
+        // it possible to render more data points without making it too dense.
+        samples.clear();
+
+        auto step_size = static_cast<uint64_t>(data.size()) / threshold;
+        if (step_size == 0) {
+            step_size = 1;
+        }
+
+        for(uint64_t idx=0; idx <= last_idx; idx += step_size) {
+            samples.emplace_back(data[idx]);
+        }
+#endif // EVEN_STEP_SIZE
+    }
+
+    for(auto&& e : samples) {
         auto epoch_ts = std::chrono::system_clock::to_time_t(e.ts);
         
         std::tm tm = *std::localtime(&epoch_ts);

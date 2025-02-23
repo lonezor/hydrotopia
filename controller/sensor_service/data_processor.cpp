@@ -55,7 +55,8 @@ std::string extract_sensor_value(const std::string& sensor_readings, const std::
 
 void data_processor::add_measurement(measurement_type type, const std::string& value)
 {
-    if (value.empty()) {
+    auto type_idx = static_cast<int>(type);
+    if (type_idx < measurement_event_index_start && value.empty()) {
         return;
     }
 
