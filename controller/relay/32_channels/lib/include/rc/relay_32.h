@@ -19,6 +19,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -60,6 +61,18 @@ extern "C"
         rc_relay_channel_15 = 0x4000, /**< Relay channel #15  */
         rc_relay_channel_16 = 0x8000, /**< Relay channel #16  */
     } rc_relay_channel_t;
+
+    #define RELAY_MSG_MAGIC (0x20141225)
+
+    #pragma pack(push, 1)
+    typedef struct {
+        uint32_t magic;
+        uint8_t  nr_channels;
+        uint8_t  port; // only relevant for 32 channel model
+        uint16_t channel;
+        uint8_t state;
+    } relay_cmd_msg_t;
+    #pragma pack(pop)
 
     /* @brief Initialize relay module
      *

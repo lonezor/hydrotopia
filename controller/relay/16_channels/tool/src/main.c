@@ -1,7 +1,14 @@
+#include <arpa/inet.h>
+#include <errno.h>
 #include <getopt.h>
+#include <netdb.h>
+#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <rc/relay_16.h>
 
@@ -13,6 +20,7 @@ enum cli_option
 {
     cli_option_list_commands = 1000, // not colliding with ASCII range
     cli_option_relay_command,
+    cli_option_server_ip,
     cli_option_help,
     cli_option_version,
 };
@@ -25,10 +33,12 @@ static bool g_list_commands = false;
 static rc_relay_channel_t g_relay_channel = rc_relay_channel_none;
 static bool g_relay_set = true;
 static bool g_relay_enabled = false;
+static const char* g_server_ip = NULL;
 
 static struct option long_options[] = {
     { "list-commands", no_argument, NULL, cli_option_list_commands },
     { "command", required_argument, NULL, cli_option_relay_command },
+    { "server-ip", required_argument, NULL, cli_option_server_ip},
     { "help", no_argument, NULL, cli_option_help },
     { "version", no_argument, NULL, cli_option_version },
     { NULL, 0, NULL, 0 }
@@ -39,23 +49,23 @@ static struct option long_options[] = {
 static void print_commands()
 {
     printf("Available commands:\n");
-    printf(" - relay_all <on/off/query>\n");
-    printf(" - relay_01  <on/off/query>\n");
-    printf(" - relay_02  <on/off/query>\n");
-    printf(" - relay_03  <on/off/query>\n");
-    printf(" - relay_04  <on/off/query>\n");
-    printf(" - relay_05  <on/off/query>\n");
-    printf(" - relay_06  <on/off/query>\n");
-    printf(" - relay_07  <on/off/query>\n");
-    printf(" - relay_08  <on/off/query>\n");
-    printf(" - relay_09  <on/off/query>\n");
-    printf(" - relay_10  <on/off/query>\n");
-    printf(" - relay_11  <on/off/query>\n");
-    printf(" - relay_12  <on/off/query>\n");
-    printf(" - relay_13  <on/off/query>\n");
-    printf(" - relay_14  <on/off/query>\n");
-    printf(" - relay_15  <on/off/query>\n");
-    printf(" - relay_16  <on/off/query>\n");
+    printf(" - relay_all <on/off>\n");
+    printf(" - relay_01  <on/off>\n");
+    printf(" - relay_02  <on/off>\n");
+    printf(" - relay_03  <on/off>\n");
+    printf(" - relay_04  <on/off>\n");
+    printf(" - relay_05  <on/off>\n");
+    printf(" - relay_06  <on/off>\n");
+    printf(" - relay_07  <on/off>\n");
+    printf(" - relay_08  <on/off>\n");
+    printf(" - relay_09  <on/off>\n");
+    printf(" - relay_10  <on/off>\n");
+    printf(" - relay_11  <on/off>\n");
+    printf(" - relay_12  <on/off>\n");
+    printf(" - relay_13  <on/off>\n");
+    printf(" - relay_14  <on/off>\n");
+    printf(" - relay_15  <on/off>\n");
+    printf(" - relay_16  <on/off>\n");
     printf("\n");
 }
 
@@ -67,10 +77,11 @@ static void print_help()
     printf("Usage: relay_ctrl [OPTIONS]\n");
     printf("\n");
     printf("Options (in order of importance):\n");
-    printf(" -l --list-commands    List available commands\n");
-    printf(" -c --command=STRING   Run command\n");
-    printf(" -h --help             This help screen\n");
-    printf("    --version          Prints version and exits\n");
+    printf(" -l --list-commands     List available commands\n");
+    printf(" -c --command=STRING    Run command\n");
+    printf("    --server-ip=STRING  Control remote relay over IP network (UDP port 20)\n");
+    printf(" -h --help              This help screen\n");
+    printf("    --version           Prints version and exits\n");
     printf("\n");
     // clang-format on
 }
@@ -151,6 +162,9 @@ static bool parse_arguments(int argc, char* argv[])
                 }
                 break;
             }
+            case cli_option_server_ip:
+                g_server_ip = optarg;
+                break;
             case cli_option_help:
                 g_help = true;
                 break;
@@ -175,6 +189,36 @@ static bool parse_arguments(int argc, char* argv[])
 }
 
 //-------------------------------------------------------------------------------------------------------------------
+
+static void send_command_to_server()
+{
+    struct sockaddr_in server_addr;
+
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = htons(20);
+	server_addr.sin_addr.s_addr = inet_addr(g_server_ip);
+
+	int fd;
+	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+		perror("socket");
+		return;
+	}
+
+    relay_cmd_msg_t msg;
+    memset(&msg, 0, sizeof(msg));
+    msg.magic = htonl((uint32_t)RELAY_MSG_MAGIC);
+    msg.port = (uint8_t)0;
+    msg.nr_channels = (uint8_t)16;
+    msg.channel = htons((uint16_t)g_relay_channel);
+    msg.state = (uint8_t)g_relay_enabled;
+
+    int res = sendto(fd, &msg, sizeof(msg), 0, (struct sockaddr *) &server_addr, sizeof(server_addr));
+    if (res != -1) {
+        printf("Command sent successfully\n");
+    }
+
+	close(fd);
+}
 
 int main(int argc, char* argv[])
 {
@@ -201,11 +245,19 @@ int main(int argc, char* argv[])
     }
 
     if (g_relay_set) {
-        rc_relay_channel_init();
-        rc_relay_channel_set(g_relay_channel, g_relay_enabled);
+        if (g_server_ip != NULL) {
+            send_command_to_server();
+        } else {
+            rc_relay_channel_init();
+            rc_relay_channel_set(g_relay_channel, g_relay_enabled);
+        }
     } else { // query
-        bool enabled = rc_relay_channel_get(g_relay_channel);
-        printf("value: %s\n", enabled ? "true" : "false");
+        if (g_server_ip != NULL) {
+            printf("query mode not yet implemented\n");
+        } else {
+            bool enabled = rc_relay_channel_get(g_relay_channel);
+            printf("value: %s\n", enabled ? "true" : "false");
+        }
     }
 
     return 0;
