@@ -11,6 +11,7 @@
 #include <chrono>
 #include <string.h>
 #include <unistd.h>
+#include <iostream>
 
 static int fd_301 = -1;
 
@@ -69,7 +70,9 @@ void handle_action(action a)
     /******* STOP ***********/
     // Always allow stop
     if (a == action::full_spectrum_led_off) {
-        system("/usr/local/bin/rc_ctrl_16 -c \"relay_04 off\" --server-ip=192.168.202.250");
+        auto cmd = "/usr/local/bin/rc_ctrl_16 -c \"relay_04 off\" --server-ip=192.168.202.250";
+        std::cout << cmd << std::endl;
+        system(cmd);
         return;
     }
 
@@ -83,8 +86,12 @@ void handle_action(action a)
         int hour = now_tm.tm_hour;
 
         if (hour >= 22 && hour <= 5) {
-            system("/usr/local/bin/rc_ctrl_16 -c \"relay_04 on\" --server-ip=192.168.202.250");
+            auto cmd = "/usr/local/bin/rc_ctrl_16 -c \"relay_04 on\" --server-ip=192.168.202.250";
+            std::cout << cmd << std::endl;
+            system(cmd);
             return;
+        } else {
+            std::cout << "Hour " << hour << " is out of allowed range" << std::endl;
         }
     }
 }
@@ -120,11 +127,11 @@ void handle_sock_buffer(const char* buffer, const int buffer_len)
 
     auto command = std::string(str.data());
 
-    if (command.find("full_spectrum_led_on")) {
+    if (command.find("full_spectrum_led_on") != std::string::npos) {
         handle_action(action::full_spectrum_led_on);
     }
 
-    if (command.find("full_spectrum_led_off")) {
+    if (command.find("full_spectrum_led_off") != std::string::npos) {
         handle_action(action::full_spectrum_led_off);
     }
 }
