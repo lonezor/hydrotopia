@@ -22,6 +22,8 @@ int main(int argc, char* argv[]) {
         printf(" - state_change_cooling_rod\n");
         printf(" - state_change_water_circulation\n");
         printf(" - state_change_o2_electrolysis\n");
+        printf(" - full_spectrum_led_on\n");
+        printf(" - full_spectrum_led_off\n");
 
         return 1;
     }
@@ -29,8 +31,13 @@ int main(int argc, char* argv[]) {
 	struct sockaddr_in server_addr;
 
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(203);
-	server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    if (strstr(argv[1],"state_change") != NULL) {
+	    server_addr.sin_port = htons(203);
+    } else if (strstr(argv[1],"full_spectrum_led") != NULL) {
+        server_addr.sin_port = htons(301);
+    }
 
 	int fd;
 	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {

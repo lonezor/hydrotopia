@@ -32,3 +32,6 @@ controller/sensor_service/hydro_sensor_service
 controller/sensor_service/server
 controller/relay/16_channels/tool/rc_ctrl_16
 controller/relay/32_channels/tool/rc_ctrl_32
+sensors/air/air_sensors_arduino
+sensors/water/water_sensors_arduino
+controller/relay/rc_ctrl_service
