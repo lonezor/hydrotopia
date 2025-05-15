@@ -63,6 +63,7 @@ enum class action
     unknown,
     full_spectrum_led_on,
     full_spectrum_led_off,
+    full_spectrum_led_force_on,
 };
 
 void handle_action(action a)
@@ -70,28 +71,47 @@ void handle_action(action a)
     /******* STOP ***********/
     // Always allow stop
     if (a == action::full_spectrum_led_off) {
-        auto cmd = "/usr/local/bin/rc_ctrl_16 -c \"relay_04 off\" --server-ip=192.168.202.250";
+        auto cmd = "/usr/local/bin/rc_ctrl_16 -c \"relay_03 off\" --server-ip=192.168.202.250";
         std::cout << cmd << std::endl;
         system(cmd);
         return;
     }
 
     /******* START ***********/
+    // Always allow forced start
+    if (a == action::full_spectrum_led_force_on) {
+        auto cmd = "/usr/local/bin/rc_ctrl_16 -c \"relay_03 on\" --server-ip=192.168.202.250";
+        std::cout << cmd << std::endl;
+        system(cmd);
+        return;
+    }
+
     if (a == action::full_spectrum_led_on) {
-        // Start depends on time of day
+        // Start depends on sh
         auto now = std::chrono::system_clock::now();
         auto now_time_t = std::chrono::system_clock::to_time_t(now);
         std::tm now_tm = *localtime(&now_time_t);
-        
-        int hour = now_tm.tm_hour;
 
-        if (hour >= 22 && hour <= 5) {
-            auto cmd = "/usr/local/bin/rc_ctrl_16 -c \"relay_04 on\" --server-ip=192.168.202.250";
+        int hour = now_tm.tm_hour;
+        int minute = now_tm.tm_min;
+        
+        bool activation_allowed = false;
+
+        if (hour >= 21 || hour <= 5) {
+            activation_allowed = true;
+        } else if (hour == 6) {
+            if (minute <= 45) {
+                activation_allowed = true;
+            }
+        }
+
+        if (activation_allowed) {
+            auto cmd = "/usr/local/bin/rc_ctrl_16 -c \"relay_03 on\" --server-ip=192.168.202.250";
             std::cout << cmd << std::endl;
             system(cmd);
             return;
         } else {
-            std::cout << "Hour " << hour << " is out of allowed range" << std::endl;
+            std::cout << "hour " << hour << ", minute " << minute << " is out of allowed range" << std::endl;
         }
     }
 }
@@ -127,11 +147,15 @@ void handle_sock_buffer(const char* buffer, const int buffer_len)
 
     auto command = std::string(str.data());
 
-    if (command.find("full_spectrum_led_on") != std::string::npos) {
+    if (command.find("full_spectrum_led_on!") != std::string::npos) {
+        handle_action(action::full_spectrum_led_force_on);
+    }
+
+    else if (command.find("full_spectrum_led_on") != std::string::npos) {
         handle_action(action::full_spectrum_led_on);
     }
 
-    if (command.find("full_spectrum_led_off") != std::string::npos) {
+    else if (command.find("full_spectrum_led_off") != std::string::npos) {
         handle_action(action::full_spectrum_led_off);
     }
 }
